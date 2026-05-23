@@ -58,12 +58,13 @@ export default function LoginPage() {
               className={`rounded-md border px-3 py-2 bg-bg-base text-text-primary placeholder-text-muted outline-none transition focus:border-primary focus:ring-1 focus:ring-primary ${
                 errors.email ? 'border-danger' : 'border-border'
               }`}
-              // register('email') nombra el campo → data.email tendrá su valor al hacer submit
-              // También inyecta ref/onChange/onBlur para que el form trackee el input internamente
+              // desestructuramos register que trae name, ref, onchange y onblur.
               {...register('email', {
                 required: 'El email es obligatorio',
               })}
             />
+            {/*Si hay error se carga el mensaje de error definido arriba "el email es obligatorio" esto porque el segundo argunmento del register es el bojeto de reglas. 
+            cuando el form intenta hacer submit evalua y si no cumple guarda el mensaje en errors.email.message */}
             {errors.email && <p className="text-xs text-danger">{errors.email.message}</p>}
           </label>
 
@@ -71,29 +72,27 @@ export default function LoginPage() {
             Contraseña
             <input
               type="password"
-              autoComplete="current-password"
-              placeholder="••••••••"
-              className={`rounded-md border px-3 py-2 bg-bg-base text-text-primary placeholder-text-muted outline-none transition focus:border-primary focus:ring-1 focus:ring-primary ${
-                errors.password ? 'border-danger' : 'border-border'
-              }`}
-              // register('password') nombra el campo → data.password tendrá su valor al hacer submit
-              // También inyecta ref/onChange/onBlur para que el form trackee el input internamente
+              placeholder="*****"
+              className={`rounded-md border px-3 py-2 bg-bg-base text-text-primary placeholder-text-muted outline-none transition focus:border-primary focus:ring-1 focus:ring-primary 
+                ${ errors.password ? 'border-danger' : 'border-border' }`}
               {...register('password', { required: 'La contraseña es obligatoria' })}
             />
+            {/*misma logica que arriba. devuelve "la contraseña es obligatoria si no esta" */}
             {errors.password && <p className="text-xs text-danger">{errors.password.message}</p>}
           </label>
               
-          {/* Error que viene del backend, distinto a los errores de validación de campo */}
+          {/* Error que viene del backend, distinto a los errores de validación de campo arriba mencionados */}
           {serverError && (
             <p className="rounded-md bg-danger/10 px-3 py-2 text-sm text-danger">{serverError}</p>
           )}
 
-          {/* disabled evita doble submit mientras el request está en vuelo */}
+          {/* disabled evita doble submit  */}
           <button
             type="submit"
             disabled={isSubmitting}
             className="mt-2 rounded-md bg-primary px-4 py-2 font-medium text-white transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
           >
+            {/*mientras se envia el submit carga ingresando y sino muestra ingresa */}
             {isSubmitting ? 'Ingresando…' : 'Ingresar'}
           </button>
         </form>
