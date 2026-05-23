@@ -1,0 +1,491 @@
+DOCUMENTACIÓN TÉCNICA — REPO-ADMIN
+Estado actual del proyecto
+================================================================================
+
+
+VISIÓN GENERAL
+================================================================================
+
+Repo-Admin es el panel de administración de un sistema de food delivery. Es una
+Single Page Application (SPA) construida con React 19 + TypeScript que consume
+una API REST en FastAPI. El frontend nunca almacena el token JWT: el backend lo
+emite como cookie httpOnly, lo que significa que el navegador la incluye
+automáticamente en cada request sin que JavaScript pueda leerla ni robarla.
+
+El panel tiene cuatro tipos de usuario con permisos distintos:
+
+  ADMIN    Administrador     Todo: CRUD completo de todos los módulos
+  STOCK    Gestor de Stock   Ver productos y cambiar disponibilidad/stock
+  PEDIDOS  Gestor de Pedidos Ver y avanzar estados de pedidos
+  CLIENT   Cliente           No accede al panel admin
+
+
+STACK TECNOLÓGICO Y POR QUÉ CADA HERRAMIENTA
+================================================================================
+
+React 19 + TypeScript
+  UI declarativa con tipado estricto. TypeScript garantiza que los datos que
+  vienen del backend se usen con los tipos correctos en toda la aplicación.
+
+Vite 8 + Rolldown
+  Bundler extremadamente rápido. Usa el plugin @tailwindcss/vite para procesar
+  Tailwind en tiempo de compilación.
+
+React Router DOM v7
+  Manejo de navegación del lado del cliente. Se usa createBrowserRouter
+  (modo Data Router) que es la API moderna y permite layout routes anidadas.
+
+TanStack Query v5
+  Manejo de server state (datos del backend). Se encarga del caché,
+  re-fetching, estados de carga y error. Reemplaza la necesidad de guardar
+  datos del servidor en un store global.
+
+Zustand v5
+  Store global minimalista. Se usa ÚNICAMENTE para el estado de sesión
+  (usuario autenticado + roles), que es el único estado verdaderamente global
+  que necesita persistir entre componentes sin estar ligado a un endpoint.
+
+Axios
+  Cliente HTTP. Se configura una única instancia centralizada en lugar de usar
+  fetch directamente, para poder aplicar configuración global (baseURL,
+  credentials) e interceptores en un solo lugar.
+
+react-hook-form v7
+  Manejo de formularios con validación. No se usa Zod ni ninguna librería de
+  schema porque la validación del backend (Pydantic) es la fuente de verdad,
+  y el frontend solo necesita validaciones básicas de UX.
+
+Tailwind CSS v4
+  Utilidades CSS. La versión 4 usa @theme en el CSS directamente en lugar de
+  tailwind.config.js, lo que simplifica el setup.
+
+
+src/index.css — SISTEMA DE DISEÑO
+================================================================================
+
+Este archivo hace dos cosas: importa Tailwind y define el sistema de tokens de
+diseño completo.
+
+Al definir variables dentro de @theme, Tailwind v4 genera automáticamente
+clases utilitarias para cada una. Por ejemplo, --color-primary: #FF6B35 genera
+bg-primary, text-primary, border-primary, etc. En los componentes se usan
+clases semánticas como bg-bg-surface o text-text-secondary en lugar de valores
+hardcodeados como bg-gray-800.
+
+Tokens definidos y su propósito:
+
+  --color-bg-base (#0D0D16)
+    Fondo del body, el color más oscuro de la aplicación.
+
+  --color-bg-sidebar (#12121E)
+    Fondo de la barra lateral, ligeramente más claro que el base para crear
+    profundidad visual.
+
+  --color-bg-surface (#1C1C2A)
+    Fondo de cards, tablas y modales — el nivel elevado sobre el base.
+
+  --color-bg-surface-2 (#232336)
+    Hover de filas en tablas, dropdowns abiertos.
+
+  --color-bg-input (#1A1A28)
+    Fondo específico de inputs y selects.
+
+  --color-border (#2A2A3C) / --color-border-subtle (#1E1E2E)
+    Bordes de contenedores y separadores.
+
+  --color-primary (#FF6B35) / --color-primary-hover / --color-primary-muted
+    Naranja de marca para botones principales y badges activos.
+
+  --color-text-primary / --color-text-secondary / --color-text-muted
+    Jerarquía tipográfica: títulos, labels, placeholders.
+
+  --color-success / --color-warning / --color-danger / --color-info / --color-enroute
+    Colores semánticos de estado. Cada uno tiene variante -muted (mismo color
+    con opacidad 15%) para fondos de badges sin ser demasiado llamativo.
+    Mapeo a estados de pedido:
+      success   → ENTREGADO
+      warning   → PENDIENTE
+      info      → EN_PREP (en preparación)
+      enroute   → EN_CAMINO
+      danger    → CANCELADO
+
+  --sidebar-width: 280px / --header-height: 80px
+    Dimensiones del layout como tokens para referenciarlas con consistencia.
+
+
+src/modules/*/types/index.ts — CAPA DE TIPOS
+================================================================================
+
+Cada módulo tiene su carpeta de types. Son interfaces TypeScript puras, sin
+lógica, que modelan exactamente lo que el backend devuelve y lo que los
+formularios envían.
+
+--- modules/auth/types/index.ts ---
+
+  type RoleCode = 'ADMIN' | 'STOCK' | 'PEDIDOS' | 'CLIENT'
+    Union type que enumera los cuatro roles del sistema. Se usa como tipo en
+    todo el proyecto para garantizar que nunca se pase un string arbitrario
+    donde se espera un rol.
+
+  interface User { id, nombre, apellido, email, celular, created_at, updated_at }
+    El usuario tal como lo devuelve el backend. No incluye password_hash ni
+    deleted_at porque el endpoint /auth/me no los expone por seguridad.
+
+  interface AuthMeResponse { usuario: User, roles: RoleCode[] }
+    La forma exacta de la respuesta de GET /auth/me. El backend devuelve el
+    objeto usuario separado de su array de roles porque la relación es N:N
+    (tabla UsuarioRol).
+
+  interface LoginForm { email: string, password: string }
+    Los campos del formulario de login. Es lo que se envía en el body del
+    POST /auth/login.
+
+--- modules/categorias/types/index.ts ---
+
+  interface Category { id, parent_id, nombre, descripcion, imagen_url,
+                       created_at, updated_at, deleted_at, subcategorias? }
+    parent_id es number | null: null significa categoría raíz (ej. "Bebidas"),
+    un número significa que es subcategoría de esa otra (ej. "Jugos").
+    La interfaz se autorreferencia con subcategorias?: Category[] porque el
+    backend puede devolver el árbol completo en un solo listado.
+    deleted_at es string | null porque el sistema usa soft delete — el registro
+    no se borra de la base de datos, solo se marca con la fecha de eliminación.
+
+  interface CategoryForm { nombre, descripcion, imagen_url, parent_id }
+    Lo que envía el formulario al crear o editar. Separado de Category para que
+    el formulario no tenga que lidiar con campos de solo lectura como id o
+    created_at.
+
+--- modules/ingredientes/types/index.ts ---
+
+  interface Ingredient { id, nombre, descripcion, es_alergeno, created_at, updated_at }
+    es_alergeno: boolean determina si el ingrediente debe mostrarse con un
+    badge de advertencia en la UI, tanto en el listado de ingredientes como
+    en la ficha del producto que lo contiene.
+
+--- modules/productos/types/index.ts ---
+
+  interface ProductIngredient { ingrediente, cantidad, unidad_medida_id, es_removible }
+    La tabla ProductoIngrediente del backend es una tabla de unión con campos
+    propios. es_removible: true significa que el cliente del store puede pedir
+    que le saquen ese ingrediente al hacer el pedido. Esos IDs elegidos van a
+    DetallePedido.personalizacion[].
+
+  interface Product { id, nombre, descripcion, precio_base, imagenes_url: string[],
+                      stock_cantidad, disponible, unidad_venta_id,
+                      created_at, updated_at, deleted_at,
+                      categorias?, ingredientes? }
+    imagenes_url es un array porque un producto puede tener múltiples fotos.
+    stock_cantidad y disponible son campos independientes:
+      stock_cantidad === 0 con disponible === true  → badge "Sin stock" en UI
+      stock_cantidad > 0  con disponible === false  → deshabilitado por operador
+    unidad_venta_id referencia UnidadMedida (kg, L, u, etc.) para mostrar el
+    precio correctamente: "S/. 12.50 / kg".
+
+  interface ProductFilters { search?, categoria_id?, disponible?, page?, size? }
+    Todos opcionales porque el listado funciona sin filtros. Se pasan como
+    query params al backend.
+
+--- modules/pedidos/types/index.ts ---
+
+  type OrderStatusCode =
+    'PENDIENTE' | 'CONFIRMADO' | 'EN_PREP' | 'EN_CAMINO' | 'ENTREGADO' | 'CANCELADO'
+    Los seis estados de la máquina de estados del pedido. La transición es
+    lineal excepto CANCELADO, que puede entrar desde PENDIENTE o CONFIRMADO.
+
+  interface OrderDetail { pedido_id, producto_id, cantidad,
+                          nombre_snapshot, precio_snapshot,
+                          subtotal_snap, personalizacion: number[], created_at }
+    nombre_snapshot y precio_snapshot son el Snapshot Pattern: cuando se crea
+    el pedido, el nombre y precio del producto se copian inmutables al detalle.
+    Garantiza que si el administrador cambia el precio de un producto en el
+    futuro, los pedidos históricos mantienen el precio original que el cliente
+    pagó. personalizacion es el array de IDs de ingredientes que el cliente
+    pidió sacar.
+
+  interface OrderStatusHistory { id, pedido_id, estado_desde, estado_hacia,
+                                  usuario_id, motivo, created_at }
+    El Audit Trail append-only: el backend solo hace INSERTs en esta tabla,
+    nunca UPDATE ni DELETE. estado_desde es null en la primera transición
+    (cuando el pedido se crea en PENDIENTE). usuario_id registra qué empleado
+    avanzó el estado.
+
+  interface Order { id, usuario_id, direccion_id, estado_codigo,
+                    forma_pago_codigo, subtotal, descuento, costo_envio,
+                    total, notas, created_at, updated_at,
+                    usuario?, detalles?, historial? }
+    usuario usa Pick<User, 'id'|'nombre'|'apellido'|'email'> porque el
+    endpoint de detalle solo incluye algunos campos del usuario, no el objeto
+    completo. detalles e historial son opcionales porque el listado general no
+    los incluye — solo se cargan al abrir el detalle de un pedido específico.
+
+--- modules/usuarios/types/index.ts ---
+
+  interface AdminUser { id, nombre, apellido, email, celular,
+                        created_at, updated_at, deleted_at, roles: RoleCode[] }
+    El usuario visto desde el panel de admin. Incluye deleted_at (a diferencia
+    de User en auth types) porque el admin necesita saber si un usuario fue
+    dado de baja. Incluye roles directamente porque el endpoint de admin hace
+    el join con UsuarioRol.
+
+--- shared/types/index.ts ---
+
+  interface PaginatedResponse<T> { items: T[], total, page, size, pages }
+    Tipo genérico reutilizable para todos los endpoints que devuelven listas
+    paginadas. El backend siempre responde con esta misma estructura, lo que
+    permite escribirlo una sola vez y usarlo como PaginatedResponse<Category>,
+    PaginatedResponse<Product>, etc.
+
+
+src/api/axiosInstance.ts — INSTANCIA HTTP CENTRALIZADA
+================================================================================
+
+  const api = axios.create({
+    baseURL: import.meta.env.VITE_API_URL,
+    withCredentials: true,
+  })
+
+Se crea UNA SOLA instancia de axios en lugar de importar axios directamente en
+cada archivo. Esto permite:
+  1. Definir baseURL una sola vez desde la variable de entorno VITE_API_URL.
+  2. withCredentials: true hace que el navegador incluya las cookies en todos
+     los requests. Sin esta opción, la cookie httpOnly del JWT nunca se
+     enviaría al backend y todas las llamadas fallarían con 401.
+
+El interceptor de respuesta captura todos los errores antes de que lleguen a
+los hooks de TanStack Query. Cuando el backend responde con 401 (sesión
+expirada), redirige directamente al login. La exclusión de /auth/me es crítica:
+useAuthInit llama a ese endpoint en cada carga de la app para verificar si hay
+sesión activa. Si el usuario no está logueado, ese request devuelve 401 — y si
+el interceptor redirigiera, causaría un loop infinito porque el login también
+pasaría por el interceptor. Al excluirlo, useAuthInit maneja ese 401 por sí
+solo llamando a clearAuth().
+
+
+src/store/authStore.ts — ESTADO GLOBAL DE SESIÓN
+================================================================================
+
+  useAuthStore con: user, roles, isAuthenticated, setAuth, clearAuth, hasRole
+
+Zustand se usa ÚNICAMENTE para este store. El estado de sesión vive aquí y no
+en TanStack Query porque no es un "recurso del servidor" que necesite caché o
+re-fetching automático. Es una decisión de arquitectura deliberada para separar
+responsabilidades:
+
+  TanStack Query  →  datos del servidor (categorías, productos, pedidos, etc.)
+                     con caché, staleTime, invalidación.
+  Zustand         →  estado de UI global accesible desde cualquier componente
+                     (guards, sidebar, header) sin pasar props.
+
+hasRole(allowed: RoleCode[]) recibe un array de roles permitidos y devuelve
+true si el usuario tiene AL MENOS UNO. Esto permite expresar permisos como
+hasRole(['ADMIN', 'STOCK']) para rutas que aceptan cualquiera de los dos roles.
+
+isAuthenticated existe como campo explícito (en lugar de calcular user !== null
+en cada componente) para hacer las condiciones más legibles en los guards.
+
+
+src/modules/auth/hooks/useAuth.ts — INICIALIZACIÓN DE SESIÓN
+================================================================================
+
+  export function useAuthInit() {
+    const { isLoading } = useQuery({
+      queryKey: ['auth', 'me'],
+      queryFn: async () => { ... setAuth / clearAuth ... },
+      retry: false,
+      staleTime: Infinity,
+    })
+    return { loading: isLoading }
+  }
+
+Este hook se llama UNA SOLA VEZ desde AuthGate al cargar la app. Su función es
+determinar si ya hay una sesión activa (si la cookie del JWT existe y es válida)
+y poblar el store en consecuencia.
+
+retry: false
+  Si el request falla (401 = no hay sesión), no reintentar. Un 401 en /auth/me
+  es esperado cuando el usuario no está logueado, no es un error de red.
+
+staleTime: Infinity
+  Una vez obtenida la respuesta, nunca se considera vieja. Evita re-fetchs
+  automáticos en cada cambio de foco de ventana. Cuando el usuario hace login
+  o logout, se invalida manualmente la query ['auth', 'me'] para forzar un
+  re-fetch.
+
+El efecto secundario (setAuth / clearAuth) dentro del queryFn es el patrón
+correcto en TanStack Query v5 — la versión 5 eliminó los callbacks
+onSuccess/onError de useQuery, por lo que la forma de sincronizar estado
+externo es manejarlo dentro de la función de query.
+
+
+src/modules/auth/services/authService.ts — SERVICIO DE AUTENTICACIÓN
+================================================================================
+
+  export async function login(data: LoginForm): Promise<void>
+  export async function logout(): Promise<void>
+
+Dos funciones puras que encapsulan las llamadas HTTP de autenticación.
+Retornan void porque:
+
+  login:   El backend no devuelve datos útiles para el frontend — simplemente
+           setea la cookie httpOnly. Los datos del usuario se obtienen en el
+           siguiente paso con /auth/me via invalidateQueries.
+
+  logout:  El backend invalida la cookie del lado del servidor. No hay
+           respuesta relevante.
+
+Separar estas funciones del componente permite testearlas de forma aislada y
+evita que la lógica de HTTP viva dentro de los componentes de UI.
+
+
+src/App.tsx — PUNTO DE ENTRADA DE LA APLICACIÓN
+================================================================================
+
+  const queryClient = new QueryClient({ ... })  // nivel de módulo, fuera del componente
+
+  export default function App() {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    )
+  }
+
+QueryClient se instancia A NIVEL DE MÓDULO (fuera del componente). Si se
+instanciara dentro del componente, se crearía un nuevo cliente en cada
+re-render, perdiendo todo el caché.
+
+QueryClientProvider envuelve RouterProvider para que todos los componentes del
+árbol de rutas tengan acceso a TanStack Query. Si estuviera al revés, los
+componentes que se renderizan en rutas no podrían usar useQuery.
+
+staleTime: 30_000 como default: los datos del servidor se consideran frescos
+durante 30 segundos. Cada query puede sobreescribir este valor (como useAuthInit
+que usa Infinity).
+
+
+src/router.tsx — CONFIGURACIÓN DE RUTAS
+================================================================================
+
+Estructura:
+
+  /           → redirect a /admin
+  /login      → LoginPage (pública, sin protección)
+  /403        → ForbiddenPage (pública, para usuarios sin rol suficiente)
+
+  AuthGate (sin path — layout guard que verifica sesión)
+    /admin → AdminLayout
+      /admin               → redirect a /admin/categorias
+      /admin/categorias    → RequireRole(['ADMIN'])          → CategoriasPage
+      /admin/ingredientes  → RequireRole(['ADMIN'])          → IngredientesPage
+      /admin/productos     → RequireRole(['ADMIN','STOCK'])  → ProductosPage
+      /admin/pedidos       → RequireRole(['ADMIN','PEDIDOS'])→ PedidosPage
+      /admin/usuarios      → RequireRole(['ADMIN'])          → UsuariosPage
+
+  *           → redirect a /
+
+AuthGate es una ruta sin path, lo que en React Router v7 significa que es un
+layout route que envuelve sus hijos sin consumir ningún segmento de URL. Esto
+permite que la lógica de verificación de sesión se ejecute una sola vez para
+todas las rutas protegidas, sin repetirla en cada página.
+
+/login y /403 están deliberadamente FUERA del AuthGate para que sean accesibles
+sin sesión. Si estuvieran dentro, el guard los protegería y nadie podría llegar
+al login.
+
+{ path: '*', element: <Navigate to="/" replace /> } captura cualquier URL
+inválida y redirige al inicio, evitando pantallas en blanco.
+
+
+src/components/guards/AuthGate.tsx — GUARD DE AUTENTICACIÓN
+================================================================================
+
+  export function AuthGate() {
+    const { loading } = useAuthInit()
+    const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+
+    if (loading)          return <spinner />
+    if (!isAuthenticated) return <Navigate to="/login" replace />
+    return <Outlet />
+  }
+
+Tres estados posibles:
+
+  1. Cargando (loading === true)
+     Se está consultando /auth/me. Muestra un spinner centrado en pantalla.
+     Es crítico mostrar algo en este estado: si no, el componente renderizaría
+     brevemente el redirect a /login antes de saber si hay sesión, causando
+     un flash de redirección incorrecto.
+
+  2. No autenticado (isAuthenticated === false)
+     La cookie no existe o expiró. Redirige a /login con replace para que el
+     botón "atrás" del navegador no vuelva a la ruta protegida.
+
+  3. Autenticado
+     Renderiza <Outlet />, que en React Router v7 es el componente hijo que
+     corresponde a la URL actual. En la práctica, renderiza AdminLayout con
+     la página correspondiente adentro.
+
+
+src/components/guards/RequireRole.tsx — GUARD DE ROLES
+================================================================================
+
+  export function RequireRole({ allowed, children }: Props) {
+    const hasRole = useAuthStore((s) => s.hasRole)
+    if (!hasRole(allowed)) return <Navigate to="/403" replace />
+    return <>{children}</>
+  }
+
+Funciona como wrapper directo alrededor del elemento de la ruta. Se ejecuta
+después de AuthGate, garantizando que el usuario ya está autenticado. Solo
+verifica si el usuario tiene alguno de los roles en allowed[].
+
+La separación entre AuthGate (¿hay sesión?) y RequireRole (¿tiene permiso?) es
+intencional: son dos preguntas distintas con dos respuestas distintas.
+Un usuario autenticado con rol CLIENT que intenta entrar a /admin/usuarios debe
+ver un "403 Prohibido", no ser redirigido al login.
+
+
+ESTRUCTURA DE DIRECTORIOS ACTUAL
+================================================================================
+
+  src/
+  ├── api/
+  │   └── axiosInstance.ts           Instancia HTTP única con interceptor
+  ├── components/
+  │   └── guards/
+  │       ├── AuthGate.tsx            ¿Hay sesión activa?
+  │       └── RequireRole.tsx         ¿Tiene el rol necesario?
+  ├── layouts/
+  │   └── AdminLayout.tsx             Stub — se reemplaza con layout real
+  ├── modules/
+  │   ├── auth/
+  │   │   ├── hooks/useAuth.ts        Sincroniza /auth/me con authStore
+  │   │   ├── pages/LoginPage.tsx     Stub — se reemplaza con login real
+  │   │   ├── services/authService.ts login() y logout()
+  │   │   └── types/index.ts
+  │   ├── categorias/
+  │   │   ├── pages/CategoriasPage.tsx  Stub
+  │   │   └── types/index.ts
+  │   ├── ingredientes/
+  │   │   ├── pages/IngredientesPage.tsx  Stub
+  │   │   └── types/index.ts
+  │   ├── pedidos/
+  │   │   ├── pages/PedidosPage.tsx   Stub
+  │   │   └── types/index.ts
+  │   ├── productos/
+  │   │   ├── pages/ProductosPage.tsx  Stub
+  │   │   └── types/index.ts
+  │   └── usuarios/
+  │       ├── pages/UsuariosPage.tsx   Stub
+  │       └── types/index.ts
+  ├── pages/
+  │   └── ForbiddenPage.tsx           Página 403
+  ├── shared/
+  │   └── types/index.ts              PaginatedResponse<T>
+  ├── store/
+  │   └── authStore.ts                Estado global de sesión (Zustand)
+  ├── App.tsx                         QueryClientProvider + RouterProvider
+  ├── index.css                       Tailwind v4 + design tokens
+  ├── main.tsx                        ReactDOM.createRoot
+  └── router.tsx                      Árbol de rutas

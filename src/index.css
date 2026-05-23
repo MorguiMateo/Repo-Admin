@@ -1,3 +1,62 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+@import "tailwindcss";
+
+/* Paleta del admin. En componentes: clases Tailwind (bg-bg-base, text-primary, border-border, etc.) */
+@theme {
+
+  /* Tipografía — Inter (sin color) */
+  --font-sans: 'Inter', system-ui, sans-serif;
+
+  /* Fondos: casi negro (base), gris muy oscuro (sidebar), gris oscuro (surface) — body, sidebar, cards y tablas */
+  --color-bg-base:         #0D0D16;
+  --color-bg-sidebar:      #12121E;
+  --color-bg-surface:      #1C1C2A;
+
+  /* Fondos: gris oscuro elevado (surface-2), gris oscuro input (input) — dropdowns, hover en filas, inputs y selects */
+  --color-bg-surface-2:    #232336;
+  --color-bg-input:        #1A1A28;
+
+  /* Bordes: gris medio (border), gris oscuro suave (border-subtle) — cards, tablas, separadores */
+  --color-border:          #2A2A3C;
+  --color-border-subtle:   #1E1E2E;
+
+  /* Marca: naranja (primary), naranja oscuro (hover), naranja suave de fondo (muted) — botones principales y badges */
+  --color-primary:         #FF6B35;
+  --color-primary-hover:   #E85A28;
+  --color-primary-muted:   #FF6B3526;
+
+  /* Texto: blanco grisáceo (primary), gris claro (secondary), gris apagado (muted) — títulos, labels, placeholders */
+  --color-text-primary:    #F1F5F9;
+  --color-text-secondary:  #94A3B8;
+  --color-text-muted:      #64748B;
+
+  /* OK: verde (success), verde suave de fondo (success-muted) — EN STOCK, ENTREGADO, Stock Normal */
+  --color-success:         #22C55E;
+  --color-success-muted:   #22C55E26;
+
+  /* Aviso: ámbar (warning), ámbar suave de fondo (warning-muted) — PENDIENTE, stock bajo */
+  --color-warning:         #F59E0B;
+  --color-warning-muted:   #F59E0B26;
+
+  /* Error: rojo (danger), rojo suave de fondo (danger-muted) — CANCELADO, STOCK BAJO, CRÍTICO */
+  --color-danger:          #EF4444;
+  --color-danger-muted:    #EF444426;
+
+  /* Info: azul (info), azul oscuro (hover), azul suave de fondo (muted) — EN PREPARACIÓN, botones secundarios */
+  --color-info:            #3B82F6;
+  --color-info-hover:      #2563EB;
+  --color-info-muted:      #3B82F626;
+
+  /* En camino: violeta (enroute), violeta suave de fondo (enroute-muted) — pedido EN CAMINO */
+  --color-enroute:         #8B5CF6;
+  --color-enroute-muted:   #8B5CF626;
+
+  /* Layout — sin color: ancho sidebar, alto header */
+  --sidebar-width:          280px;
+  --header-height:          80px;
+}
+
+/* Reset básico (quita márgenes por defecto del navegador) */
 *, *::before, *::after {
   box-sizing: border-box;
 }
@@ -7,13 +66,24 @@
   padding: 0;
 }
 
-body {
-  font-family: system-ui, sans-serif;
-  line-height: 1.5;
+html {
+  font-family: var(--font-sans);
+  background-color: var(--color-bg-base);
+  color: var(--color-text-primary);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  line-height: 1.5;
 }
 
 img, svg {
   display: block;
   max-width: 100%;
 }
+
+/* Scrollbar delgada: carril gris muy oscuro (sidebar), thumb gris medio (border) */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--color-bg-sidebar); }
+::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
