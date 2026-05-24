@@ -1,26 +1,30 @@
-// funciones que hablan con la API de categorías.los componentes no llaman a api directamente, siempre pasan por acá
 import api from '../../../api/axiosInstance'
 import type { Category, CategoryForm } from '../types'
 import type { PaginatedResponse } from '../../../shared/types'
+import { toSkipLimit, wrapAsPage } from '../../../shared/types'
 
-// devuelve una promesa que cuando se resuelve te da una lista paginada de categorías
-export async function getAll(params: { page?: number; size?: number }): Promise<PaginatedResponse<Category>> {
-  const { data } = await api.get('/categorias/', { params })
-  return data
+export async function getAll(
+  params: { page?: number; size?: number; parent_id?: number } = {},
+): Promise<PaginatedResponse<Category>> {
+  const { page = 1, size = 100, parent_id } = params
+  const { skip, limit } = toSkipLimit(page, size)
+  const { data } = await api.get<Category[]>('/categorias', {
+    params: { skip, limit, parent_id },
+  })
+  return wrapAsPage(data, page, size)
 }
 
 export async function create(body: CategoryForm): Promise<Category> {
-  const { data } = await api.post('/categorias/', body)
+  const { data } = await api.post('/categorias', body)
   return data
 }
 
-// Partial hace todos los campos de CategoryForm opcionales. en un PATCH solo mandas lo que cambio
+// PUT porque el back recibe el body completo.
 export async function update(id: number, body: Partial<CategoryForm>): Promise<Category> {
-  const { data } = await api.patch(`/categorias/${id}`, body)
+  const { data } = await api.put(`/categorias/${id}`, body)
   return data
 }
 
-// no devuelve ningún valor cuando se resuelve
 export async function remove(id: number): Promise<void> {
   await api.delete(`/categorias/${id}`)
 }

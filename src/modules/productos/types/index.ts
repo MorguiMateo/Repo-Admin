@@ -1,6 +1,12 @@
 import type { Category } from '../../categorias/types'
 import type { Ingredient } from '../../ingredientes/types'
 
+// Categoría asociada a un producto (back lo devuelve anidado con es_principal)
+export interface ProductCategory {
+  categoria: Category
+  es_principal: boolean
+}
+
 // Ingrediente asociado a un producto
 export interface ProductIngredient {
   ingrediente: Ingredient
@@ -21,11 +27,24 @@ export interface Product {
   created_at: string
   updated_at: string
   deleted_at: string | null
-  categorias?: Category[]
+  categorias?: ProductCategory[]
   ingredientes?: ProductIngredient[]
 }
 
-// crear editar producto
+// body que espera el back. La UI lo arma a partir de checkboxes simples y completa
+// `cantidad` y `unidad_medida_id` con defaults sensatos por ingrediente.
+export interface ProductCategoryLink {
+  categoria_id: number
+  es_principal: boolean
+}
+
+export interface ProductIngredientLink {
+  ingrediente_id: number
+  es_removible: boolean
+  cantidad: number
+  unidad_medida_id: number
+}
+
 export interface ProductForm {
   nombre: string
   descripcion: string
@@ -33,8 +52,8 @@ export interface ProductForm {
   imagenes_url: string[]
   stock_cantidad: number
   disponible: boolean
-  categoria_ids: number[]
-  ingrediente_ids: number[]
+  categorias: ProductCategoryLink[]
+  ingredientes: ProductIngredientLink[]
 }
 
 // filtros para el listado — van como query params

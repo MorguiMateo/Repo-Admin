@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { advanceStatus } from '../services/pedidosService'
+import { advanceStatus, cancelOrder } from '../services/pedidosService'
 import type { OrderStatusCode } from '../types'
 
 interface Props {
@@ -34,17 +34,25 @@ export function AdvanceStatusButton({ pedidoId, estadoActual }: Props) {
   const queryClient = useQueryClient()
 
 
-  const mutation = useMutation({
+  const invalidate = () => {
+    queryClient.invalidateQueries({ queryKey: ['pedidos'] })
+    queryClient.invalidateQueries({ queryKey: ['pedido', pedidoId] })
+  }
+
+  const advanceMutation = useMutation({
     //argumento que recibe mi func cuando se le de por ejemplo al boton de aprobar pedido
-    mutationFn: (estado_nuevo: OrderStatusCode) =>
-      // le paso id y estado a advanceStatus que esta hace el patch q actualiza.
-      advanceStatus(pedidoId, { estado_nuevo }),
-    onSuccess: () => {
-      //invalidamos cache y la refresca con los datos nuevos.
-      queryClient.invalidateQueries({ queryKey: ['pedidos'] })
-      queryClient.invalidateQueries({ queryKey: ['pedido', pedidoId] })
-    },
+    mutationFn: (estado_hacia: OrderStatusCode) =>
+      // POST /pedidos/{id}/avanzar — el back valida la transición y devuelve el pedido actualizado.
+      advanceStatus(pedidoId, { estado_hacia }),
+    onSuccess: invalidate,
   })
+
+  const cancelMutation = useMutation({
+    mutationFn: (motivo: string) => cancelOrder(pedidoId, motivo),
+    onSuccess: invalidate,
+  })
+
+  const isPending = advanceMutation.isPending || cancelMutation.isPending
 
   //estado al que se avanza
   const nextState = NEXT[estadoActual]
@@ -62,13 +70,14 @@ export function AdvanceStatusButton({ pedidoId, estadoActual }: Props) {
   const handleAdvance = () => {
     if (!nextState) return
     //llama al back con el estado siguiente.
-    mutation.mutate(nextState)
+    advanceMutation.mutate(nextState)
   }
 
   const handleCancel = () => {
-    //se pregunta si cancelar el pedido en caso de cancelar se muta al estado CANCELADO.
-    if (!window.confirm('¿Cancelar este pedido?')) return
-    mutation.mutate('CANCELADO')
+    // el back exige motivo cuando se cancela.
+    const motivo = window.prompt('Motivo de la cancelación:')?.trim()
+    if (!motivo) return
+    cancelMutation.mutate(motivo)
   }
 
   return (
@@ -77,17 +86,17 @@ export function AdvanceStatusButton({ pedidoId, estadoActual }: Props) {
       {nextState && (
         <button
           onClick={handleAdvance}
-          disabled={mutation.isPending}
+          disabled={isPending}
           className="px-3 py-1 text-xs font-medium rounded-lg bg-primary hover:bg-primary-hover text-white disabled:opacity-50 cursor-pointer transition-colors"
         >
-          {mutation.isPending ? '...' : nextLabel}
+          {isPending ? '...' : nextLabel}
         </button>
       )}
       {/* solo muestra cancelar mientras canCancel sea true. si esta en estado isPending se deesabilita tmb */}
       {canCancel && (
         <button
           onClick={handleCancel}
-          disabled={mutation.isPending}
+          disabled={isPending}
           className="px-3 py-1 text-xs font-medium rounded-lg border border-danger text-danger hover:bg-danger hover:text-white disabled:opacity-50 cursor-pointer transition-colors"
         >
           Cancelar

@@ -13,8 +13,9 @@ export function useAuthInit() {
     queryKey: ['auth', 'me'],
     queryFn: async () => {
       try {
+        // /auth/me devuelve un UserPublic plano con la lista de roles.
         const { data } = await api.get<AuthMeResponse>('/auth/me')
-        setAuth(data.usuario, data.roles)
+        setAuth(data, data.roles)
         return data
       } catch (error) {
         clearAuth()

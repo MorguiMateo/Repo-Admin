@@ -1,10 +1,18 @@
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import api from '../../../api/axiosInstance'
 import { create, update } from '../services/productosService'
 import { getAll as getCategorias } from '../../categorias/services/categoriasService'
 import { getAll as getIngredientes } from '../../ingredientes/services/ingredientesService'
 import type { Product, ProductForm } from '../types'
+
+interface UnidadMedida {
+  id: number
+  nombre: string
+  simbolo: string
+  tipo: string
+}
 
 interface Props {
   product?: Product
@@ -25,7 +33,7 @@ export function ProductFormModal({ product, onClose }: Props) {
   const isEditing = !!product
 
   const [selectedCatIds, setSelectedCatIds] = useState<number[]>(
-    product?.categorias?.map((c) => c.id) ?? []
+    product?.categorias?.map((pc) => pc.categoria.id) ?? []
   )
   const [selectedIngIds, setSelectedIngIds] = useState<number[]>(
     product?.ingredientes?.map((pi) => pi.ingrediente.id) ?? []
@@ -52,7 +60,7 @@ export function ProductFormModal({ product, onClose }: Props) {
         disponible: product.disponible,
         imagenes_raw: product.imagenes_url.join('\n'),
       })
-      setSelectedCatIds(product.categorias?.map((c) => c.id) ?? [])
+      setSelectedCatIds(product.categorias?.map((pc) => pc.categoria.id) ?? [])
       setSelectedIngIds(product.ingredientes?.map((pi) => pi.ingrediente.id) ?? [])
     }
   }, [product, reset])
@@ -68,6 +76,18 @@ export function ProductFormModal({ product, onClose }: Props) {
     queryFn: () => getIngredientes({ size: 100 }),
     staleTime: Infinity,
   })
+
+  // Necesitamos al menos una unidad para mandar al back en cada ingrediente.
+  // La UI hoy no permite elegirla, así que usamos la primera disponible como default.
+  const { data: unidades } = useQuery({
+    queryKey: ['unidades-medida'],
+    queryFn: async () => {
+      const { data } = await api.get<UnidadMedida[]>('/unidades-medida', { params: { limit: 50 } })
+      return data
+    },
+    staleTime: Infinity,
+  })
+  const defaultUnidadId = unidades?.[0]?.id
 
   const toggleCat = (id: number) =>
     setSelectedCatIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id])
@@ -85,6 +105,10 @@ export function ProductFormModal({ product, onClose }: Props) {
   })
 
   const onSubmit = (fields: FormFields) => {
+    if (selectedIngIds.length > 0 && !defaultUnidadId) {
+      window.alert('No hay unidades de medida cargadas. Creá al menos una antes de asociar ingredientes.')
+      return
+    }
     const body: ProductForm = {
       nombre: fields.nombre,
       descripcion: fields.descripcion,
@@ -92,8 +116,18 @@ export function ProductFormModal({ product, onClose }: Props) {
       stock_cantidad: Number(fields.stock_cantidad),
       disponible: fields.disponible,
       imagenes_url: fields.imagenes_raw.split(/\r?\n/).map((u) => u.trim()).filter(Boolean),
-      categoria_ids: selectedCatIds,
-      ingrediente_ids: selectedIngIds,
+      // El back espera objetos: armamos defaults razonables. La primera categoría
+      // queda marcada como principal; cada ingrediente usa cantidad=1 y la unidad por defecto.
+      categorias: selectedCatIds.map((id, idx) => ({
+        categoria_id: id,
+        es_principal: idx === 0,
+      })),
+      ingredientes: selectedIngIds.map((id) => ({
+        ingrediente_id: id,
+        es_removible: true,
+        cantidad: 1,
+        unidad_medida_id: defaultUnidadId!,
+      })),
     }
     mutation.mutate(body)
   }

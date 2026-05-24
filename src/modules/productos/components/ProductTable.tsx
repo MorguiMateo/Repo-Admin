@@ -97,12 +97,15 @@ export function ProductTable({ externalFilters, isAdmin, isStock }: Props) {
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-1">
                       {(prod.categorias ?? []).length > 0 ? (
-                        prod.categorias!.map((cat) => (
+                        prod.categorias!.map((pc) => (
                           <span
-                            key={cat.id}
+                            key={pc.categoria.id}
                             className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-primary-muted text-primary"
                           >
-                            {cat.nombre}
+                            {pc.categoria.nombre}
+                            {pc.es_principal && (
+                              <span className="ml-1 text-[10px] uppercase tracking-wide">★</span>
+                            )}
                           </span>
                         ))
                       ) : (

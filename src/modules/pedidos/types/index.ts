@@ -58,6 +58,6 @@ export interface Order {
 
 // body del request para avanzar el estado
 export interface AdvanceStatusForm {
-  estado_nuevo: OrderStatusCode
+  estado_hacia: OrderStatusCode
   motivo?: string
 }

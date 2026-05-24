@@ -22,8 +22,7 @@ export interface AdminUser {
   roles: RoleCode[]
 }
 
-// formulario para asignar un rol a un usuario
+// formulario para asignar un rol a un usuario (el back recibe la lista completa final)
 export interface AssignRoleForm {
   rol_codigo: RoleCode
-  expires_at?: string | null
 }

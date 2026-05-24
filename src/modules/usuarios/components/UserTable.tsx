@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { getAll, removeRole, softDelete } from '../services/usuariosService'
+import { getAll, setRoles, softDelete } from '../services/usuariosService'
 import { AssignRoleModal } from './AssignRoleModal'
 import type { AdminUser } from '../types'
 import type { RoleCode } from '../../auth/types'
@@ -19,9 +19,10 @@ export function UserTable({ filters }: { filters: UsuarioFilters }) {
     queryFn: () => getAll({ ...filters, size: 100 }),
   })
 
-  //se pasa id y rol y se le hace delete con removeRole desp se invalida la cache y se actualiz
+  // El back reemplaza la lista completa: armamos la nueva lista sin el rol que se quita.
   const removeRoleMutation = useMutation({
-    mutationFn: ({ id, rol }: { id: number; rol: RoleCode }) => removeRole(id, rol),
+    mutationFn: ({ user, rol }: { user: AdminUser; rol: RoleCode }) =>
+      setRoles(user.id, user.roles.filter((r) => r !== rol)),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['usuarios'] }),
   })
 
@@ -31,10 +32,15 @@ export function UserTable({ filters }: { filters: UsuarioFilters }) {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['usuarios'] }),
   })
 
-  //salta alerta de confirmar remover el rol y si se acepta lo remueve
+  //salta alerta de confirmar remover el rol y si se acepta lo remueve.
+  //el back exige al menos 1 rol, así que cortamos si es el último.
   const handleRemoveRole = (user: AdminUser, rol: RoleCode) => {
+    if (user.roles.length <= 1) {
+      window.alert('No se puede quitar el último rol del usuario.')
+      return
+    }
     if (!window.confirm(`¿Quitar el rol ${rol} de ${user.nombre}?`)) return
-    removeRoleMutation.mutate({ id: user.id, rol })
+    removeRoleMutation.mutate({ user, rol })
   }
 
   // lo mismo pero para elimianr

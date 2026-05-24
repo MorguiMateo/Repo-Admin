@@ -1,7 +1,8 @@
 import { useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { assignRole } from '../services/usuariosService'
+import { setRoles } from '../services/usuariosService'
 import type { AdminUser, AssignRoleForm } from '../types'
+import type { RoleCode } from '../../auth/types'
 
 // onclose para que lo maneje el padre y lo cierre
 interface Props {
@@ -12,26 +13,29 @@ interface Props {
 export function AssignRoleModal({ user, onClose }: Props) {
   const queryClient = useQueryClient()
 
-  //roll arranca en Stock y nullc
+  // rol arranca en Stock por default
   const { register, handleSubmit, formState: { errors } } = useForm<AssignRoleForm>({
-    defaultValues: { rol_codigo: 'STOCK', expires_at: null },
+    defaultValues: { rol_codigo: 'STOCK' },
   })
 
-  //asigna el roll pasando id y body
-  //cuando el backend responde oK invalida cache y cierra modal
+  // El back reemplaza la lista completa: armamos {rol nuevo} ∪ existentes.
   const mutation = useMutation({
-    mutationFn: (body: AssignRoleForm) => assignRole(user.id, body),
+    mutationFn: (rol_codigo: RoleCode) => {
+      const finalRoles = Array.from(new Set<RoleCode>([...user.roles, rol_codigo]))
+      return setRoles(user.id, finalRoles)
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['usuarios'] })
       onClose()
     },
   })
 
-  //Se  llama esta funcion cuando los datos ya estan validaddos
   const enviar = (data: AssignRoleForm) => {
-    // || null convierte el string vacio que devuelve el input type="date" a null porque el backend espera null
-    //expires at va a ser data.expires_at o null si d.e._at esta vacio
-    mutation.mutate({ ...data, expires_at: data.expires_at || null })
+    if (user.roles.includes(data.rol_codigo)) {
+      onClose()
+      return
+    }
+    mutation.mutate(data.rol_codigo)
   }
 
   return (
@@ -48,7 +52,6 @@ export function AssignRoleModal({ user, onClose }: Props) {
           <div className="flex flex-col gap-1">
             <label className="text-sm font-medium text-text-secondary">Rol *</label>
             <select
-            //si no selecciona un rol devuelve error
               {...register('rol_codigo', { required: 'Seleccioná un rol' })}
               className="w-full rounded-lg border border-border bg-bg-input px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-info transition-colors"
             >
@@ -58,17 +61,6 @@ export function AssignRoleModal({ user, onClose }: Props) {
               <option value="CLIENT">CLIENT</option>
             </select>
             {errors.rol_codigo && <p className="text-xs text-danger">{errors.rol_codigo.message}</p>}
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-text-secondary">
-              Expira el
-            </label>
-            <input
-              type="date"
-              {...register('expires_at')}
-              className="w-full rounded-lg border border-border bg-bg-input px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-info transition-colors"
-            />
           </div>
 
           {mutation.isError && (

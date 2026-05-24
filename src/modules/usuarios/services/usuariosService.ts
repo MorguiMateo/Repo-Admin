@@ -1,34 +1,35 @@
 import api from '../../../api/axiosInstance'
-import type { AdminUser, AssignRoleForm } from '../types'
+import type { AdminUser } from '../types'
 import type { RoleCode } from '../../auth/types'
 import type { PaginatedResponse } from '../../../shared/types'
+import { toSkipLimit, wrapAsPage } from '../../../shared/types'
 
-//parametros aceptados por el endpoint. todos opcionales porq el back tiene valores por defaulkt
-//cuando axios recibe un objeto en params lo serializa como query string ejemplo ?rol=ADMIN&page=1&size=20
+// filtros aceptados. todo opcional porque el back tiene defaults.
 export interface UsuarioFilters {
   rol?: RoleCode
+  q?: string
   page?: number
   size?: number
 }
 
-// hacemos get y le pasa por parametros UsuarioFilters
-// params le dice a axios que el objeto va como query string
+// GET /admin/usuarios
 export async function getAll(params: UsuarioFilters): Promise<PaginatedResponse<AdminUser>> {
-  const { data } = await api.get('/usuarios/', { params })
+  const { page = 1, size = 100, rol, q } = params
+  const { skip, limit } = toSkipLimit(page, size)
+  const { data } = await api.get<AdminUser[]>('/admin/usuarios', {
+    params: { skip, limit, rol, q },
+  })
+  return wrapAsPage(data, page, size)
+}
+
+// PATCH /admin/usuarios/{id}/roles — reemplaza la lista completa de roles del usuario.
+// El back exige `roles` con min length 1; el caller arma la lista final.
+export async function setRoles(id: number, roles: RoleCode[]): Promise<AdminUser> {
+  const { data } = await api.patch(`/admin/usuarios/${id}/roles`, { roles })
   return data
 }
 
-//post al usuario x id con el body AssingRoleForm que tiene rol y fecha de expiracion opcional
-export async function assignRole(id: number, body: AssignRoleForm): Promise<void> {
-  await api.post(`/usuarios/${id}/roles`, body)
-}
-
-// hace delete del rol x id de usuairio
-export async function removeRole(id: number, roleCode: RoleCode): Promise<void> {
-  await api.delete(`/usuarios/${id}/roles/${roleCode}`)
-}
-
-// el back setea deleted_at = now() para no borrar el registro en la base de datos
+// DELETE /admin/usuarios/{id} — soft delete (setea deleted_at = now()).
 export async function softDelete(id: number): Promise<void> {
-  await api.delete(`/usuarios/${id}`)
+  await api.delete(`/admin/usuarios/${id}`)
 }
