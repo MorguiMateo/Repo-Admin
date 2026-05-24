@@ -37,6 +37,7 @@ export function AdvanceStatusButton({ pedidoId, estadoActual }: Props) {
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ['pedidos'] })
     queryClient.invalidateQueries({ queryKey: ['pedido', pedidoId] })
+    queryClient.invalidateQueries({ queryKey: ['productos'] })
   }
 
   const advanceMutation = useMutation({

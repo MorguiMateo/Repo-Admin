@@ -109,6 +109,7 @@ export function ProductFormModal({ product, onClose }: Props) {
       window.alert('No hay unidades de medida cargadas. Creá al menos una antes de asociar ingredientes.')
       return
     }
+    const unidadId = defaultUnidadId ?? 0
     const body: ProductForm = {
       nombre: fields.nombre,
       descripcion: fields.descripcion,
@@ -116,8 +117,6 @@ export function ProductFormModal({ product, onClose }: Props) {
       stock_cantidad: Number(fields.stock_cantidad),
       disponible: fields.disponible,
       imagenes_url: fields.imagenes_raw.split(/\r?\n/).map((u) => u.trim()).filter(Boolean),
-      // El back espera objetos: armamos defaults razonables. La primera categoría
-      // queda marcada como principal; cada ingrediente usa cantidad=1 y la unidad por defecto.
       categorias: selectedCatIds.map((id, idx) => ({
         categoria_id: id,
         es_principal: idx === 0,
@@ -126,7 +125,7 @@ export function ProductFormModal({ product, onClose }: Props) {
         ingrediente_id: id,
         es_removible: true,
         cantidad: 1,
-        unidad_medida_id: defaultUnidadId!,
+        unidad_medida_id: unidadId,
       })),
     }
     mutation.mutate(body)
