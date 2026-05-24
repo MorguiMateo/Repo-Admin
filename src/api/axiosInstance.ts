@@ -1,21 +1,32 @@
 import axios from 'axios'
 
-// Instancia compartida por todos los módulos — base URL viene del .env
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
-  withCredentials: true, // envía la cookie httpOnly con el JWT en cada request
+  withCredentials: true,
 })
 
-// Intercepta todas las respuestas antes de que lleguen a los hooks
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     const url: string = error.config?.url ?? ''
-        // /auth/me lo maneja useAuthInit. si redirigimos acá causaría loop infinito en el login
-    if (error.response?.status === 401 && !url.includes('/auth/me')) {
-      window.location.href = '/login'
+
+    if (error.response?.status !== 401) return Promise.reject(error)
+
+    // login y refresh: el caller maneja el error directamente
+    if (url.includes('/auth/login') || url.includes('/auth/refresh')) return Promise.reject(error)
+
+    // ya se reintentó una vez — evita loop infinito si el retry también da 401
+    if (error.config._retry) return Promise.reject(error)
+    error.config._retry = true
+
+    try {
+      await api.post('/auth/refresh')
+      return api(error.config)
+    } catch {
+      // /auth/me lo maneja useAuthInit → clearAuth → AuthGate redirige a /login
+      if (!url.includes('/auth/me')) window.location.href = '/login'
+      return Promise.reject(error)
     }
-    return Promise.reject(error)
   }
 )
 

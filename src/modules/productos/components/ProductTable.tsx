@@ -4,6 +4,8 @@ import { getAll, remove, patchDisponible } from '../services/productosService'
 import { ProductFormModal } from './ProductFormModal'
 import type { Product, ProductFilters } from '../types'
 
+const PAGE_SIZE = 20
+
 interface Props {
   externalFilters: ProductFilters
   isAdmin: boolean
@@ -16,16 +18,26 @@ export function ProductTable({ externalFilters, isAdmin, isStock }: Props) {
   const [editTarget, setEditTarget] = useState<Product | null>(null)
   const [pendingToggleId, setPendingToggleId] = useState<number | null>(null)
 
-  // cuando cambian los filtros externos se vuelve a la primer página
   const { search, categoria_id, disponible } = externalFilters
   useEffect(() => { setPage(1) }, [search, categoria_id, disponible])
 
-  const filters = { ...externalFilters, page, size: 20 }
-
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ['productos', filters],
-    queryFn: () => getAll(filters),
+  const { data: allProducts = [], isLoading, isError } = useQuery({
+    queryKey: ['productos'],
+    queryFn: getAll,
   })
+
+  // filtrado client-side
+  const filtered = allProducts.filter((prod) => {
+    if (search && !prod.nombre.toLowerCase().includes(search.toLowerCase())) return false
+    if (categoria_id !== undefined && !prod.categorias?.some((pc) => pc.categoria.id === categoria_id)) return false
+    if (disponible !== undefined && prod.disponible !== disponible) return false
+    return true
+  })
+
+  // Math.ceil redondea hacia arriba: 21 productos con PAGE_SIZE=20 → 1.05 → 2 páginas
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE) || 1
+  const start = (page - 1) * PAGE_SIZE
+  const items = filtered.slice(start, start + PAGE_SIZE)
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => remove(id),
@@ -54,8 +66,6 @@ export function ProductTable({ externalFilters, isAdmin, isStock }: Props) {
   if (isLoading) return <p className="text-text-muted">Cargando...</p>
   if (isError) return <p className="text-danger">Error al cargar productos.</p>
 
-  const items = data?.items ?? []
-  const totalPages = data?.pages ?? 1
   const canToggle = isAdmin || isStock
 
   return (

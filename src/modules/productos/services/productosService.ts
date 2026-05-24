@@ -1,15 +1,11 @@
 import api from '../../../api/axiosInstance'
-import type { Product, ProductForm, ProductFilters } from '../types'
-import type { PaginatedResponse } from '../../../shared/types'
-import { toSkipLimit, wrapAsPage } from '../../../shared/types'
+import type { Product, ProductForm } from '../types'
 
-export async function getAll(params: ProductFilters): Promise<PaginatedResponse<Product>> {
-  const { page = 1, size = 20, search, categoria_id, disponible } = params
-  const { skip, limit } = toSkipLimit(page, size)
+export async function getAll(): Promise<Product[]> {
   const { data } = await api.get<Product[]>('/productos', {
-    params: { skip, limit, q: search, categoria_id, disponible },
+    params: { skip: 0, limit: 200 },
   })
-  return wrapAsPage(data, page, size)
+  return data
 }
 
 export async function getById(id: number): Promise<Product> {

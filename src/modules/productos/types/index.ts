@@ -1,6 +1,12 @@
 import type { Category } from '../../categorias/types'
 import type { Ingredient } from '../../ingredientes/types'
 
+export interface UnidadMedida {
+  id: number
+  nombre: string
+  simbolo: string
+}
+
 // Categoría asociada a un producto (back lo devuelve anidado con es_principal)
 export interface ProductCategory {
   categoria: Category
@@ -24,6 +30,7 @@ export interface Product {
   stock_cantidad: number
   disponible: boolean
   unidad_venta_id: number | null
+  unidad_venta?: UnidadMedida | null
   created_at: string
   updated_at: string
   deleted_at: string | null
@@ -56,11 +63,9 @@ export interface ProductForm {
   ingredientes: ProductIngredientLink[]
 }
 
-// filtros para el listado — van como query params
+// filtros para el listado — aplicados client-side (el back solo acepta skip/limit)
 export interface ProductFilters {
   search?: string
   categoria_id?: number
   disponible?: boolean
-  page?: number
-  size?: number
 }
