@@ -62,7 +62,7 @@ export function AssignRoleModal({ user, onClose }: Props) {
 
           <div className="flex flex-col gap-1">
             <label className="text-sm font-medium text-text-secondary">
-              Expira el <span className="text-text-muted">(opcional)</span>
+              Expira el
             </label>
             <input
               type="date"
