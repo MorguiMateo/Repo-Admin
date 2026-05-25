@@ -24,6 +24,9 @@ export function CategoryTable({ isAdmin }: Props) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categorias'] })
     },
+    //
+    //
+    //
     onError: (err) => {
       if (axios.isAxiosError(err) && err.response?.status === 409) {
         setDeleteError('No se puede eliminar: la categoría tiene productos activos.')
@@ -32,6 +35,9 @@ export function CategoryTable({ isAdmin }: Props) {
       }
     },
   })
+  //
+  //
+  //
 
   const handleDelete = (cat: Category) => {
     setDeleteError(null)

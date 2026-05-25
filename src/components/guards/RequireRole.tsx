@@ -10,6 +10,7 @@ interface Props {
 
 export function RequireRole({ allowed, children }: Props) {
   const hasRole = useAuthStore((s) => s.hasRole)
+  //ForbiddenPage. pagina que te envia si no tienes permisos
   if (!hasRole(allowed)) return <ForbiddenPage />
   return <>{children}</>
 }
