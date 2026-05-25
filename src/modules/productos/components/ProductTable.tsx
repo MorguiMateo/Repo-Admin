@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import axios from 'axios'
 import { getAll, remove, patchDisponible, patchStock } from '../services/productosService'
 import { ProductFormModal } from './ProductFormModal'
 import type { Product, ProductFilters } from '../types'
@@ -18,6 +19,7 @@ export function ProductTable({ externalFilters, isAdmin, isStock }: Props) {
   const [editTarget, setEditTarget] = useState<Product | null>(null)
   const [pendingToggleId, setPendingToggleId] = useState<number | null>(null)
   const [savingStockId, setSavingStockId] = useState<number | null>(null)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   const { search, categoria_id, disponible } = externalFilters
   useEffect(() => { setPage(1) }, [search, categoria_id, disponible])
@@ -42,7 +44,17 @@ export function ProductTable({ externalFilters, isAdmin, isStock }: Props) {
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => remove(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['productos'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['productos'] })
+      setDeleteError(null)
+    },
+    onError: (err) => {
+      if (axios.isAxiosError(err) && err.response?.status === 409) {
+        setDeleteError('No se puede eliminar: el producto tiene pedidos asociados.')
+      } else {
+        setDeleteError('Ocurrió un error al eliminar.')
+      }
+    },
   })
 
   const toggleMutation = useMutation({
@@ -64,6 +76,7 @@ export function ProductTable({ externalFilters, isAdmin, isStock }: Props) {
   })
 
   const handleDelete = (prod: Product) => {
+    setDeleteError(null)
     if (!window.confirm(`¿Eliminar "${prod.nombre}"?`)) return
     deleteMutation.mutate(prod.id)
   }
@@ -80,6 +93,10 @@ export function ProductTable({ externalFilters, isAdmin, isStock }: Props) {
 
   return (
     <>
+      {deleteError && (
+        <p className="text-sm text-danger bg-danger-muted px-4 py-2 rounded-lg">{deleteError}</p>
+      )}
+
       <div className="rounded-xl border border-border overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-bg-surface text-text-muted uppercase text-xs tracking-wide">

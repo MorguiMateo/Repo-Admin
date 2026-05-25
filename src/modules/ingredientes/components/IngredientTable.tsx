@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import axios from 'axios'
 import { getAll, remove } from '../services/ingredientesService'
 import { IngredientFormModal } from './IngredientFormModal'
 import type { Ingredient } from '../types'
@@ -13,8 +14,8 @@ export function IngredientTable({ isAdmin }: Props) {
   const queryClient = useQueryClient()
   //la pagina arranca por 1 
   const [page, setPage] = useState(1)
-  //si es null no hay modal abierto. cuando se le da click a editar se setea con el ingrediente y se abre la modal
   const [editTarget, setEditTarget] = useState<Ingredient | null>(null)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
 
   const { data, isLoading, isError } = useQuery({
@@ -25,14 +26,23 @@ export function IngredientTable({ isAdmin }: Props) {
   })
 
   //recibe id y llama al remove que hace delete en api.
-const deleteMutation = useMutation({
+  const deleteMutation = useMutation({
     mutationFn: (id: number) => remove(id),
-    //cuando delete sale bien invalida las entradas de cache que empiecen con "ingredientes" para que la tabla se refresque automaticamente..
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['ingredientes'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ingredientes'] })
+      setDeleteError(null)
+    },
+    onError: (err) => {
+      if (axios.isAxiosError(err) && err.response?.status === 409) {
+        setDeleteError('No se puede eliminar: el ingrediente está en uso por un producto activo.')
+      } else {
+        setDeleteError('Ocurrió un error al eliminar.')
+      }
+    },
   })
 
-  //pregunta si quieres eliminar. si el usuario dice que no corta la ejecucion si confirma llama a deleteMutation.mutate y pasa el id del ingrediente.
   const handleDelete = (ing: Ingredient) => {
+    setDeleteError(null)
     if (!window.confirm(`¿Eliminar "${ing.nombre}"?`)) return
     deleteMutation.mutate(ing.id)
   }
@@ -47,6 +57,10 @@ const deleteMutation = useMutation({
 
   return (
     <>
+      {deleteError && (
+        <p className="text-sm text-danger bg-danger-muted px-4 py-2 rounded-lg">{deleteError}</p>
+      )}
+
       <div className="rounded-xl border border-border overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-bg-surface text-text-muted uppercase text-xs tracking-wide">

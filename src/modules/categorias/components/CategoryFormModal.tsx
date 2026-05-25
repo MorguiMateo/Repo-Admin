@@ -1,6 +1,6 @@
-import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import axios from 'axios'
 import { getAll, create, update } from '../services/categoriasService'
 import type { Category, CategoryForm } from '../types'
 
@@ -13,27 +13,12 @@ export function CategoryFormModal({ category, onClose }: Props) {
   const queryClient = useQueryClient()
   const isEditing = !!category
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<CategoryForm>({
-    defaultValues: {
-      nombre: '',
-      descripcion: '',
-      imagen_url: '',
-      parent_id: null,
-    },
+  const { register, handleSubmit, formState: { errors } } = useForm<CategoryForm>({
+    defaultValues: category
+      ? { nombre: category.nombre, descripcion: category.descripcion ?? '', imagen_url: category.imagen_url ?? '', parent_id: category.parent_id }
+      : { nombre: '', descripcion: '', imagen_url: '', parent_id: null },
   })
 
-  useEffect(() => {
-    if (category) {
-      reset({
-        nombre:      category.nombre,
-        descripcion: category.descripcion ?? '',
-        imagen_url:  category.imagen_url  ?? '',
-        parent_id:   category.parent_id,
-      })
-    }
-  }, [category, reset])
-
-  // Solo categorías padre para el selector de parent_id
   const { data: categoriasData } = useQuery({
     queryKey: ['categorias'],
     queryFn: () => getAll({ size: 100 }),
@@ -47,6 +32,11 @@ export function CategoryFormModal({ category, onClose }: Props) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categorias'] })
       onClose()
+    },
+    onError: (err) => {
+      if (axios.isAxiosError(err)) {
+        console.error('Error al guardar categoría:', err.response?.status, err.response?.data)
+      }
     },
   })
 
