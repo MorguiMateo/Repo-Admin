@@ -40,40 +40,32 @@ export default function ProductosPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-text-primary">Productos</h1>
-          <p className="text-sm text-text-muted mt-1">Gestioná el catálogo de productos.</p>
-        </div>
-        {/* solo se renderiza si se es admin. al clickearlo setea showCreate a true y mas abajo esto renderiza la modal del producto */}
+    <div className="flex flex-col gap-4 min-w-0">
+      <div className="flex items-center justify-between gap-4">
+        <p className="text-sm text-text-muted">Gestioná el catálogo de productos.</p>
         {isAdmin && (
           <button
             onClick={() => setShowCreate(true)}
-            className="px-4 py-2 rounded-lg bg-info hover:bg-info-hover text-white text-sm font-medium transition-colors cursor-pointer"
+            className="shrink-0 px-3 py-1.5 rounded border border-border bg-bg-surface text-text-primary text-sm cursor-pointer"
           >
-            + Nuevo producto
+            Nuevo producto
           </button>
         )}
       </div>
 
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-2">
         <input
           type="text"
           value={search}
-          //setea/actualiza el el texto del imput
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Buscar producto..."
-          className="rounded-lg border border-border bg-bg-input px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-info transition-colors w-56"
+          className="rounded border border-border bg-bg-input px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-info w-56"
         />
 
         <select
-        //si categoria id es undefind muestra todas las categorías
           value={categoriaId ?? ''}
-          //si el usuario elije la opcion vacía(todas las categorpias)
-          //si seleciona una categoria convierte el strung del value a numero x el Numver
           onChange={(e) => setCategoriaId(e.target.value ? Number(e.target.value) : undefined)}
-          className="rounded-lg border border-border bg-bg-input px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-info transition-colors cursor-pointer"
+          className="rounded border border-border bg-bg-input px-3 py-1.5 text-sm text-text-primary focus:outline-none focus:border-info cursor-pointer"
         >
           {/*los option solo aceptan string entonces se lo deja vacio para representar undefined que significa que no tien filtro activo */}
           <option value="">Todas las categorías</option>
@@ -94,7 +86,7 @@ export default function ProductosPage() {
               //si hay valor es true se compara con true  y da true si es false se compara con true y da false porque no es igual a true
             else setDisponibleFilter(e.target.value === 'true')
           }}
-          className="rounded-lg border border-border bg-bg-input px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-info transition-colors cursor-pointer"
+          className="rounded border border-border bg-bg-input px-3 py-1.5 text-sm text-text-primary focus:outline-none focus:border-info cursor-pointer"
         >
           {/*depende del valor es lo que muestra */}
           <option value="">Disponibilidad</option>

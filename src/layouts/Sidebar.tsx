@@ -8,24 +8,22 @@ export function Sidebar() {
   const visibleItems = NAV_ITEMS.filter((item) => hasRole(item.roles))
 
   return (
-    <aside className="w-[280px] h-screen flex flex-col bg-bg-sidebar border-r border-border shrink-0">
+    <aside className="w-[240px] h-full flex flex-col bg-bg-sidebar border-r border-border shrink-0">
 
-      {/* Logo */}
-      <div className="h-20 flex items-center px-6 border-b border-border">
-        <span className="text-xl font-bold text-text-primary">Repo Admin</span>
+      <div className="h-16 flex items-center px-5 border-b border-border">
+        <span className="text-base font-semibold text-text-primary">Repo Admin</span>
       </div>
 
-      {/* Nav */}
-      <nav className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1">
+      <nav className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-0.5">
         {visibleItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
             className={({ isActive }) =>
-              `flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+              `px-3 py-2 rounded text-sm ${
                 isActive
-                  ? 'bg-info-muted text-info border-l-2 border-info pl-[10px]'
-                  : 'text-text-secondary hover:bg-bg-surface-2 hover:text-text-primary'
+                  ? 'bg-bg-surface-2 text-text-primary'
+                  : 'text-text-secondary'
               }`
             }
           >
@@ -34,11 +32,10 @@ export function Sidebar() {
         ))}
       </nav>
 
-      {/* Usuario */}
-      <div className="p-4 border-t border-border">
-        <div className="flex flex-col gap-0.5">
-          <span className="text-sm font-medium text-text-primary">{user?.nombre}</span>
-          <span className="text-xs text-text-muted">{user?.email}</span>
+      <div className="px-5 py-4 border-t border-border">
+        <div className="flex flex-col gap-0.5 min-w-0">
+          <span className="text-sm text-text-primary truncate">{user?.nombre}</span>
+          <span className="text-xs text-text-muted truncate">{user?.email}</span>
         </div>
       </div>
 

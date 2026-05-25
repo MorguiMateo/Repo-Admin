@@ -10,20 +10,17 @@ export default function CategoriasPage() {
   const [modalOpen, setModalOpen] = useState(false)
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4 min-w-0">
 
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-text-primary">Categorías</h2>
-          <p className="text-sm text-text-secondary mt-1">Gestioná las categorías y subcategorías del catálogo</p>
-        </div>
+      <div className="flex items-center justify-between gap-4">
+        <p className="text-sm text-text-muted">Gestioná las categorías y subcategorías del catálogo.</p>
 
         {isAdmin && (
           <button
             onClick={() => setModalOpen(true)}
-            className="bg-info hover:bg-info-hover text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer"
+            className="shrink-0 px-3 py-1.5 rounded border border-border bg-bg-surface text-text-primary text-sm cursor-pointer"
           >
-            + Nueva categoría
+            Nueva categoría
           </button>
         )}
       </div>

@@ -58,51 +58,44 @@ export function IngredientTable({ isAdmin }: Props) {
   return (
     <>
       {deleteError && (
-        <p className="text-sm text-danger bg-danger-muted px-4 py-2 rounded-lg">{deleteError}</p>
+        <p className="text-sm text-danger bg-danger-muted px-3 py-2 rounded">{deleteError}</p>
       )}
 
-      <div className="rounded-xl border border-border overflow-hidden">
+      <div className="border border-border rounded overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-bg-surface text-text-muted uppercase text-xs tracking-wide">
+          <thead className="bg-bg-surface text-text-muted text-xs">
             <tr>
-              <th className="px-4 py-3 text-left">Nombre</th>
-              <th className="px-4 py-3 text-left">Descripción</th>
-              <th className="px-4 py-3 text-left">Alérgeno</th>
-              {isAdmin && <th className="px-4 py-3 text-right">Acciones</th>}
+              <th className="px-4 py-2 text-left font-medium">Nombre</th>
+              <th className="px-4 py-2 text-left font-medium">Descripción</th>
+              <th className="px-4 py-2 text-left font-medium">Alérgeno</th>
+              {isAdmin && <th className="px-4 py-2 text-right font-medium">Acciones</th>}
             </tr>
           </thead>
-          {/* divide-y dibuja lineas horizontales entre los hijos del elemento excepto el primero(creo) */}
           <tbody className="divide-y divide-border">
-            {/*por cada ingrediente carga una fila con 3 columnas de datos */}
             {items.map((ing) => (
-              <tr key={ing.id} className="bg-bg-surface-2 hover:bg-bg-surface transition-colors">
-                <td className="px-4 py-3 font-medium text-text-primary">{ing.nombre}</td>
-                <td className="px-4 py-3 text-text-secondary">{ing.descripcion ?? '..'}</td>
-                <td className="px-4 py-3">
-                  {/*si es alergeno ccarga */}
+              <tr key={ing.id}>
+                <td className="px-4 py-2.5 text-text-primary">{ing.nombre}</td>
+                <td className="px-4 py-2.5 text-text-secondary">{ing.descripcion ?? '—'}</td>
+                <td className="px-4 py-2.5">
                   {ing.es_alergeno ? (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-warning-muted text-warning">
-                      Alérgeno
-                    </span>
+                    <span className="text-xs text-warning">Sí</span>
                   ) : (
                     <span className="text-text-muted">—</span>
                   )}
                 </td>
-              {/* la columna de acciones solo se renderiza si se es admin */}
 
                 {isAdmin && (
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex items-center justify-end gap-2">
+                  <td className="px-4 py-2.5 text-right">
+                    <div className="flex items-center justify-end gap-3">
                       <button
-                      //cambia el estado y eso mas abajo renderiza la modal
                         onClick={() => setEditTarget(ing)}
-                        className="text-text-muted hover:text-info transition-colors cursor-pointer"
+                        className="text-xs text-text-secondary cursor-pointer"
                       >
                         Editar
                       </button>
                       <button
                         onClick={() => handleDelete(ing)}
-                        className="text-text-muted hover:text-danger transition-colors cursor-pointer"
+                        className="text-xs text-text-secondary cursor-pointer"
                       >
                         Eliminar
                       </button>
@@ -120,17 +113,17 @@ export function IngredientTable({ isAdmin }: Props) {
           <button
             disabled={page === 1}
             onClick={() => setPage((p) => p - 1)}
-            className="px-3 py-1 rounded-lg border border-border hover:bg-bg-surface-2 disabled:opacity-40 transition-colors cursor-pointer"
+            className="px-3 py-1 rounded border border-border disabled:opacity-40 cursor-pointer"
           >
-            ← Anterior
+            Anterior
           </button>
           <span>Página {page} de {totalPages}</span>
           <button
             disabled={page === totalPages}
             onClick={() => setPage((p) => p + 1)}
-            className="px-3 py-1 rounded-lg border border-border hover:bg-bg-surface-2 disabled:opacity-40 transition-colors cursor-pointer"
+            className="px-3 py-1 rounded border border-border disabled:opacity-40 cursor-pointer"
           >
-            Siguiente →
+            Siguiente
           </button>
         </div>
       )}

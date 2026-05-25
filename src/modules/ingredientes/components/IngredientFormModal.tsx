@@ -35,38 +35,47 @@ export function IngredientFormModal({ ingredient, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-      <div className="bg-bg-surface rounded-xl border border-border w-full max-w-md p-6 flex flex-col gap-5">
+      <div className="bg-bg-surface rounded border border-border w-full max-w-md p-6 flex flex-col gap-4">
 
-        <h3 className="text-lg font-semibold text-text-primary">
-          {isEditing ? 'Editar ingrediente' : 'Nuevo ingrediente'}
-        </h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-base font-semibold text-text-primary">
+            {isEditing ? 'Editar ingrediente' : 'Nuevo ingrediente'}
+          </h3>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-text-muted cursor-pointer text-xl leading-none"
+          >
+            ×
+          </button>
+        </div>
 
-        <form onSubmit={handleSubmit((data) => mutation.mutate(data))} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit((data) => mutation.mutate(data))} className="flex flex-col gap-3">
 
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-text-secondary">Nombre *</label>
+            <label className="text-sm text-text-secondary">Nombre *</label>
             <input
               {...register('nombre', { required: 'El nombre es obligatorio' })}
-              className="w-full rounded-lg border border-border bg-bg-input px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-info transition-colors"
+              className="w-full rounded border border-border bg-bg-input px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-info"
               placeholder="Ej: Tomate"
             />
             {errors.nombre && <p className="text-xs text-danger">{errors.nombre.message}</p>}
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-text-secondary">Descripción</label>
+            <label className="text-sm text-text-secondary">Descripción</label>
             <textarea
               {...register('descripcion')}
-              className="w-full rounded-lg border border-border bg-bg-input px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-info transition-colors resize-none"
+              className="w-full rounded border border-border bg-bg-input px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-info resize-none"
               placeholder="Descripción opcional"
             />
           </div>
 
-          <label className="flex items-center gap-3 cursor-pointer select-none">
+          <label className="flex items-center gap-2 cursor-pointer select-none">
             <input
               type="checkbox"
               {...register('es_alergeno')}
-              className="w-4 h-4 rounded accent-warning cursor-pointer"
+              className="cursor-pointer"
             />
             <span className="text-sm text-text-secondary">Es alérgeno</span>
           </label>
@@ -75,11 +84,11 @@ export function IngredientFormModal({ ingredient, onClose }: Props) {
             <p className="text-xs text-danger">Ocurrió un error al guardar. Revisá los datos.</p>
           )}
 
-          <div className="flex justify-end gap-3 pt-2">
+          <div className="flex justify-end gap-2 pt-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg text-sm text-text-secondary hover:text-text-primary hover:bg-bg-surface-2 transition-colors cursor-pointer"
+              className="px-3 py-1.5 rounded border border-border text-sm text-text-secondary cursor-pointer"
             >
               Cancelar
             </button>
@@ -87,9 +96,9 @@ export function IngredientFormModal({ ingredient, onClose }: Props) {
             <button
               type="submit"
               disabled={mutation.isPending}
-              className="px-4 py-2 rounded-lg text-sm bg-info hover:bg-info-hover text-white font-medium transition-colors cursor-pointer disabled:opacity-50"
+              className="px-3 py-1.5 rounded border border-border bg-bg-surface-2 text-sm text-text-primary cursor-pointer disabled:opacity-50"
             >
-              {mutation.isPending ? 'Guardando...' : isEditing ? 'Guardar cambios' : 'Crear'}
+              {mutation.isPending ? 'Guardando...' : isEditing ? 'Guardar' : 'Crear'}
             </button>
           </div>
 

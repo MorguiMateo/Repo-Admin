@@ -94,20 +94,20 @@ export function ProductTable({ externalFilters, isAdmin, isStock }: Props) {
   return (
     <>
       {deleteError && (
-        <p className="text-sm text-danger bg-danger-muted px-4 py-2 rounded-lg">{deleteError}</p>
+        <p className="text-sm text-danger bg-danger-muted px-3 py-2 rounded">{deleteError}</p>
       )}
 
-      <div className="rounded-xl border border-border overflow-hidden">
+      <div className="border border-border rounded overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-bg-surface text-text-muted uppercase text-xs tracking-wide">
+          <thead className="bg-bg-surface text-text-muted text-xs">
             <tr>
-              <th className="px-4 py-3 text-left">Nombre</th>
-              <th className="px-4 py-3 text-left">Precio</th>
-              <th className="px-4 py-3 text-left">Categorías</th>
-              <th className="px-4 py-3 text-left">Alérgenos</th>
-              <th className="px-4 py-3 text-left">Stock</th>
-              {canToggle && <th className="px-4 py-3 text-left">Disponible</th>}
-              {isAdmin && <th className="px-4 py-3 text-right">Acciones</th>}
+              <th className="px-4 py-2 text-left font-medium">Nombre</th>
+              <th className="px-4 py-2 text-left font-medium">Precio</th>
+              <th className="px-4 py-2 text-left font-medium">Categorías</th>
+              <th className="px-4 py-2 text-left font-medium">Alérgenos</th>
+              <th className="px-4 py-2 text-left font-medium">Stock</th>
+              {canToggle && <th className="px-4 py-2 text-left font-medium">Disponible</th>}
+              {isAdmin && <th className="px-4 py-2 text-right font-medium">Acciones</th>}
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -127,48 +127,23 @@ export function ProductTable({ externalFilters, isAdmin, isStock }: Props) {
                 .map((pi) => pi.ingrediente.nombre)
 
               return (
-                <tr key={prod.id} className="bg-bg-surface-2 hover:bg-bg-surface transition-colors">
-                  <td className="px-4 py-3 font-medium text-text-primary">{prod.nombre}</td>
-                  <td className="px-4 py-3 text-text-secondary">${prod.precio_base.toFixed(2)}</td>
+                <tr key={prod.id}>
+                  <td className="px-4 py-2.5 text-text-primary">{prod.nombre}</td>
+                  <td className="px-4 py-2.5 text-text-secondary">${prod.precio_base.toFixed(2)}</td>
 
-                  <td className="px-4 py-3">
-                    <div className="flex flex-wrap gap-1">
-                      {(prod.categorias ?? []).length > 0 ? (
-                        prod.categorias!.map((pc) => (
-                          <span
-                            key={pc.categoria.id}
-                            className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-primary-muted text-primary"
-                          >
-                            {pc.categoria.nombre}
-                            {pc.es_principal && (
-                              <span className="ml-1 text-[10px] uppercase tracking-wide">★</span>
-                            )}
-                          </span>
-                        ))
-                      ) : (
-                        <span className="text-text-muted">—</span>
-                      )}
-                    </div>
+                  <td className="px-4 py-2.5 text-text-secondary">
+                    {(prod.categorias ?? []).length > 0
+                      ? prod.categorias!.map((pc) => pc.categoria.nombre).join(', ')
+                      : <span className="text-text-muted">—</span>}
                   </td>
 
-                  <td className="px-4 py-3">
-                    <div className="flex flex-wrap gap-1">
-                      {alergenos.length > 0 ? (
-                        alergenos.map((nombre) => (
-                          <span
-                            key={nombre}
-                            className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-warning-muted text-warning"
-                          >
-                            {nombre}
-                          </span>
-                        ))
-                      ) : (
-                        <span className="text-text-muted">—</span>
-                      )}
-                    </div>
+                  <td className="px-4 py-2.5 text-text-secondary">
+                    {alergenos.length > 0
+                      ? alergenos.join(', ')
+                      : <span className="text-text-muted">—</span>}
                   </td>
 
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-2.5">
                     <StockCell
                       value={prod.stock_cantidad}
                       editable={canToggle}
@@ -181,31 +156,29 @@ export function ProductTable({ externalFilters, isAdmin, isStock }: Props) {
                   </td>
 
                   {canToggle && (
-                    <td className="px-4 py-3">
-                      <button
-                        onClick={() => handleToggle(prod)}
+                    <td className="px-4 py-2.5">
+                      <input
+                        type="checkbox"
+                        checked={prod.disponible}
                         disabled={pendingToggleId === prod.id}
-                        className={`relative inline-flex items-center h-5 w-9 rounded-full transition-colors cursor-pointer disabled:opacity-50 ${prod.disponible ? 'bg-success' : 'bg-border'}`}
-                      >
-                        <span
-                          className={`inline-block w-3.5 h-3.5 rounded-full bg-white shadow transition-transform ${prod.disponible ? 'translate-x-4' : 'translate-x-1'}`}
-                        />
-                      </button>
+                        onChange={() => handleToggle(prod)}
+                        className="cursor-pointer"
+                      />
                     </td>
                   )}
 
                   {isAdmin && (
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end gap-2">
+                    <td className="px-4 py-2.5 text-right">
+                      <div className="flex items-center justify-end gap-3">
                         <button
                           onClick={() => setEditTarget(prod)}
-                          className="text-text-muted hover:text-info transition-colors cursor-pointer"
+                          className="text-xs text-text-secondary cursor-pointer"
                         >
                           Editar
                         </button>
                         <button
                           onClick={() => handleDelete(prod)}
-                          className="text-text-muted hover:text-danger transition-colors cursor-pointer"
+                          className="text-xs text-text-secondary cursor-pointer"
                         >
                           Eliminar
                         </button>
@@ -224,17 +197,17 @@ export function ProductTable({ externalFilters, isAdmin, isStock }: Props) {
           <button
             disabled={page === 1}
             onClick={() => setPage((p) => p - 1)}
-            className="px-3 py-1 rounded-lg border border-border hover:bg-bg-surface-2 disabled:opacity-40 transition-colors cursor-pointer"
+            className="px-3 py-1 rounded border border-border disabled:opacity-40 cursor-pointer"
           >
-            ← Anterior
+            Anterior
           </button>
           <span>Página {page} de {totalPages}</span>
           <button
             disabled={page === totalPages}
             onClick={() => setPage((p) => p + 1)}
-            className="px-3 py-1 rounded-lg border border-border hover:bg-bg-surface-2 disabled:opacity-40 transition-colors cursor-pointer"
+            className="px-3 py-1 rounded border border-border disabled:opacity-40 cursor-pointer"
           >
-            Siguiente →
+            Siguiente
           </button>
         </div>
       )}
@@ -281,13 +254,13 @@ function StockCell({
         disabled={saving}
         onChange={(e) => setDraft(e.target.value)}
         onKeyDown={(e) => { if (e.key === 'Enter' && valid && dirty) onSave(parsed) }}
-        className="w-20 rounded-lg border border-border bg-bg-input px-2 py-1 text-sm text-text-primary focus:outline-none focus:border-info transition-colors disabled:opacity-50"
+        className="w-20 rounded border border-border bg-bg-input px-2 py-1 text-sm text-text-primary focus:outline-none focus:border-info disabled:opacity-50"
       />
       {dirty && (
         <button
           onClick={() => onSave(parsed)}
           disabled={!valid || saving}
-          className="text-xs font-medium text-info hover:text-info-hover disabled:opacity-50 transition-colors cursor-pointer"
+          className="text-xs text-text-secondary disabled:opacity-50 cursor-pointer"
         >
           {saving ? '…' : 'Guardar'}
         </button>

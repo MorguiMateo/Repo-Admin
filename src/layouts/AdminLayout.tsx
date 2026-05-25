@@ -4,15 +4,13 @@ import { Header } from './Header'
 
 export default function AdminLayout() {
   return (
-    //ocupa toda la pantalla y no scrollea
     <div className="flex h-screen bg-bg-base overflow-hidden">
       <Sidebar />
 
-      
       <div className="flex flex-col flex-1 min-w-0">
         <Header />
 
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden px-8 py-6">
           <Outlet />
         </main>
       </div>

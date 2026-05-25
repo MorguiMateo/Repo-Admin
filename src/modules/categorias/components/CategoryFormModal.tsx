@@ -49,42 +49,48 @@ export function CategoryFormModal({ category, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-      <div className="bg-bg-surface rounded-xl border border-border w-full max-w-md p-6 flex flex-col gap-5">
+      <div className="bg-bg-surface rounded border border-border w-full max-w-md p-6 flex flex-col gap-4">
 
-        <h3 className="text-lg font-semibold text-text-primary">
-          {isEditing ? 'Editar categoría' : 'Nueva categoría'}
-        </h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-base font-semibold text-text-primary">
+            {isEditing ? 'Editar categoría' : 'Nueva categoría'}
+          </h3>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-text-muted cursor-pointer text-xl leading-none"
+          >
+            ×
+          </button>
+        </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3">
 
-          {/* Nombre */}
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-text-secondary">Nombre *</label>
+            <label className="text-sm text-text-secondary">Nombre *</label>
             <input
               {...register('nombre', { required: 'El nombre es obligatorio' })}
-              className="w-full rounded-lg border border-border bg-bg-input px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-info transition-colors"
+              className="w-full rounded border border-border bg-bg-input px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-info"
               placeholder="Ej: Platos principales"
             />
             {errors.nombre && <p className="text-xs text-danger">{errors.nombre.message}</p>}
           </div>
 
-          {/* Descripción */}
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-text-secondary">Descripción</label>
+            <label className="text-sm text-text-secondary">Descripción</label>
             <textarea
               {...register('descripcion')}
               rows={3}
-              className="w-full rounded-lg border border-border bg-bg-input px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-info transition-colors resize-none"
+              className="w-full rounded border border-border bg-bg-input px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-info resize-none"
               placeholder="Descripción opcional"
             />
           </div>
 
-          {/* Categoría padre */}
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-text-secondary">Categoría padre</label>
+            <label className="text-sm text-text-secondary">Categoría padre</label>
             <select
               {...register('parent_id')}
-              className="w-full rounded-lg border border-border bg-bg-input px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-info transition-colors"
+              className="w-full rounded border border-border bg-bg-input px-3 py-1.5 text-sm text-text-primary focus:outline-none focus:border-info"
             >
               <option value="">— Ninguna (es categoría raíz) —</option>
               {padres.map((p) => (
@@ -97,21 +103,20 @@ export function CategoryFormModal({ category, onClose }: Props) {
             <p className="text-xs text-danger">Ocurrió un error. Revisá los datos.</p>
           )}
 
-          {/* Botones */}
-          <div className="flex justify-end gap-3 pt-2">
+          <div className="flex justify-end gap-2 pt-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg text-sm text-text-secondary hover:text-text-primary hover:bg-bg-surface-2 transition-colors cursor-pointer"
+              className="px-3 py-1.5 rounded border border-border text-sm text-text-secondary cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={mutation.isPending}
-              className="px-4 py-2 rounded-lg text-sm bg-info hover:bg-info-hover text-white font-medium transition-colors cursor-pointer disabled:opacity-50"
+              className="px-3 py-1.5 rounded border border-border bg-bg-surface-2 text-sm text-text-primary cursor-pointer disabled:opacity-50"
             >
-              {mutation.isPending ? 'Guardando...' : isEditing ? 'Guardar cambios' : 'Crear'}
+              {mutation.isPending ? 'Guardando...' : isEditing ? 'Guardar' : 'Crear'}
             </button>
           </div>
 

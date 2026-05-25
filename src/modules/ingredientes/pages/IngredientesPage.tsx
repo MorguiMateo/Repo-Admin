@@ -9,18 +9,15 @@ export default function IngredientesPage() {
   const [showCreate, setShowCreate] = useState(false)
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-text-primary">Ingredientes</h1>
-          <p className="text-sm text-text-muted mt-1">Gestioná los ingredientes del menú.</p>
-        </div>
+    <div className="flex flex-col gap-4 min-w-0">
+      <div className="flex items-center justify-between gap-4">
+        <p className="text-sm text-text-muted">Gestioná los ingredientes del menú.</p>
         {isAdmin && (
           <button
             onClick={() => setShowCreate(true)}
-            className="px-4 py-2 rounded-lg bg-info hover:bg-info-hover text-white text-sm font-medium transition-colors cursor-pointer"
+            className="shrink-0 px-3 py-1.5 rounded border border-border bg-bg-surface text-text-primary text-sm cursor-pointer"
           >
-            + Nuevo ingrediente
+            Nuevo ingrediente
           </button>
         )}
       </div>
