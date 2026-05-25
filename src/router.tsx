@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { AuthGate } from './components/guards/AuthGate'
 import { RequireRole } from './components/guards/RequireRole'
 import AdminLayout from './layouts/AdminLayout'
+import AdminIndex from './pages/AdminIndex'
 import LoginPage from './modules/auth/pages/LoginPage'
 import CategoriasPage from './modules/categorias/pages/CategoriasPage'
 import IngredientesPage from './modules/ingredientes/pages/IngredientesPage'
@@ -23,8 +24,9 @@ export const router = createBrowserRouter([
         path: '/admin',
         element: <AdminLayout />,
         children: [
-          //index es la ruta por defecto que viene a ser /admin y de ahí lo reenvia a categorías si no hay mas nada
-          { index: true, element: <Navigate to="categorias" replace /> },
+          //index es la ruta por defecto de /admin: redirige al primer módulo
+          //que el usuario puede ver según su rol (ADMIN→categorías, STOCK→productos, etc.)
+          { index: true, element: <AdminIndex /> },
           {
             path: 'categorias',
             element: <RequireRole allowed={['ADMIN']}><CategoriasPage /></RequireRole>,

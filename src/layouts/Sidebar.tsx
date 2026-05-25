@@ -1,20 +1,11 @@
 import { NavLink } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
-
-const NAV_ITEMS = [
-  { to: '/admin/categorias',   label: 'Categorías',  roles: ['ADMIN'] },
-  { to: '/admin/ingredientes', label: 'Ingredientes', roles: ['ADMIN'] },
-  { to: '/admin/productos',    label: 'Productos',    roles: ['ADMIN', 'STOCK'] },
-  { to: '/admin/pedidos',      label: 'Pedidos',      roles: ['ADMIN', 'PEDIDOS'] },
-  { to: '/admin/usuarios',     label: 'Usuarios',     roles: ['ADMIN'] },
-] as const
+import { NAV_ITEMS } from './navItems'
 
 export function Sidebar() {
   const { user, hasRole } = useAuthStore()
 
-  const visibleItems = NAV_ITEMS.filter((item) =>
-    hasRole([...item.roles])
-  )
+  const visibleItems = NAV_ITEMS.filter((item) => hasRole(item.roles))
 
   return (
     <aside className="w-[280px] h-screen flex flex-col bg-bg-sidebar border-r border-border shrink-0">

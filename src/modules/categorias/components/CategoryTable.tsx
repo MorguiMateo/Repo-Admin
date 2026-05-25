@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import axios from 'axios'
 import { getAll, remove } from '../services/categoriasService'
@@ -67,9 +67,9 @@ export function CategoryTable({ isAdmin }: Props) {
               const subs = hijos.filter((h) => h.parent_id === padre.id)
 
               return (
-                <>
+                <Fragment key={padre.id}>
                   {/* Fila padre */}
-                  <tr key={padre.id} className="bg-bg-surface-2 hover:bg-bg-surface transition-colors">
+                  <tr className="bg-bg-surface-2 hover:bg-bg-surface transition-colors">
                     <td className="px-4 py-3 font-semibold text-text-primary">{padre.nombre}</td>
                     <td className="px-4 py-3 text-text-secondary">{padre.descripcion ?? '—'}</td>
                     {isAdmin && (
@@ -97,7 +97,7 @@ export function CategoryTable({ isAdmin }: Props) {
                       )}
                     </tr>
                   ))}
-                </>
+                </Fragment>
               )
             })}
           </tbody>

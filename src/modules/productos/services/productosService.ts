@@ -3,7 +3,7 @@ import type { Product, ProductForm } from '../types'
 
 export async function getAll(): Promise<Product[]> {
   const { data } = await api.get<Product[]>('/productos', {
-    params: { skip: 0, limit: 200 },
+    params: { skip: 0, limit: 100 },
   })
   return data
 }
@@ -31,5 +31,11 @@ export async function remove(id: number): Promise<void> {
 // PATCH dedicado para ADMIN/STOCK.
 export async function patchDisponible(id: number, disponible: boolean): Promise<Product> {
   const { data } = await api.patch(`/productos/${id}/disponibilidad`, { disponible })
+  return data
+}
+
+// PATCH de solo-stock, habilitado para ADMIN/STOCK (no toca precio/nombre/etc.).
+export async function patchStock(id: number, stock_cantidad: number): Promise<Product> {
+  const { data } = await api.patch(`/productos/${id}/stock`, { stock_cantidad })
   return data
 }

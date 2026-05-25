@@ -3,7 +3,6 @@ import { useQuery } from '@tanstack/react-query'
 import { getAll } from '../services/pedidosService'
 import { PedidoRow } from '../components/PedidoRow'
 import { useAuthStore } from '../../../store/authStore'
-import type { OrderStatusCode } from '../types'
 
 const ESTADOS: { value: string; label: string }[] = [
   { value: '', label: 'Todos' },
@@ -22,9 +21,12 @@ export default function PedidosPage() {
 
   const filters = { estado: estado || undefined, page, size: 20 }
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, isFetching } = useQuery({
     queryKey: ['pedidos', filters],
     queryFn: () => getAll(filters),
+    // Auto-refresh: vuelve a consultar los pedidos cada 5s para reflejar
+    // nuevos pedidos o cambios de estado sin recargar la página.
+    refetchInterval: 5000,
   })
 
   const items = data?.items ?? []
@@ -33,7 +35,12 @@ export default function PedidosPage() {
   return (
     <div className="flex flex-col gap-6 p-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-text-primary">Pedidos</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-xl font-semibold text-text-primary">Pedidos</h1>
+          {isFetching && !isLoading && (
+            <span className="text-xs text-text-muted animate-pulse">Actualizando…</span>
+          )}
+        </div>
         <div className="flex items-center gap-3">
           <label className="text-sm text-text-secondary">Estado</label>
           <select

@@ -28,10 +28,13 @@ export default function PedidoDetailPage() {
   const pedidoId = Number(id)
   const canAdvance = useAuthStore((s) => s.hasRole(['ADMIN', 'PEDIDOS']))
 
-  const { data: pedido, isLoading, isError } = useQuery({
+  const { data: pedido, isLoading, isError, isFetching } = useQuery({
     queryKey: ['pedido', pedidoId],
     queryFn: () => getById(pedidoId),
     enabled: !isNaN(pedidoId),
+    // Auto-refresh: igual que la lista, re-consulta cada 5s para reflejar
+    // cambios de estado del pedido (avance/cancelación) sin recargar la página.
+    refetchInterval: 5000,
   })
 
   if (isLoading) return <p className="p-6 text-text-muted">Cargando...</p>
@@ -54,6 +57,9 @@ export default function PedidoDetailPage() {
         <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${statusClass}`}>
           {statusLabel}
         </span>
+        {isFetching && !isLoading && (
+          <span className="text-xs text-text-muted animate-pulse">Actualizando…</span>
+        )}
         {canAdvance && (
           <AdvanceStatusButton pedidoId={pedido.id} estadoActual={pedido.estado_codigo} />
         )}

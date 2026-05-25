@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { getAll, remove, patchDisponible } from '../services/productosService'
+import { getAll, remove, patchDisponible, patchStock } from '../services/productosService'
 import { ProductFormModal } from './ProductFormModal'
 import type { Product, ProductFilters } from '../types'
 
@@ -17,6 +17,7 @@ export function ProductTable({ externalFilters, isAdmin, isStock }: Props) {
   const [page, setPage] = useState(1)
   const [editTarget, setEditTarget] = useState<Product | null>(null)
   const [pendingToggleId, setPendingToggleId] = useState<number | null>(null)
+  const [savingStockId, setSavingStockId] = useState<number | null>(null)
 
   const { search, categoria_id, disponible } = externalFilters
   useEffect(() => { setPage(1) }, [search, categoria_id, disponible])
@@ -51,6 +52,15 @@ export function ProductTable({ externalFilters, isAdmin, isStock }: Props) {
       setPendingToggleId(null)
     },
     onError: () => setPendingToggleId(null),
+  })
+
+  const stockMutation = useMutation({
+    mutationFn: ({ id, stock }: { id: number; stock: number }) => patchStock(id, stock),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['productos'] })
+      setSavingStockId(null)
+    },
+    onError: () => setSavingStockId(null),
   })
 
   const handleDelete = (prod: Product) => {
@@ -141,7 +151,17 @@ export function ProductTable({ externalFilters, isAdmin, isStock }: Props) {
                     </div>
                   </td>
 
-                  <td className="px-4 py-3 text-text-secondary">{prod.stock_cantidad}</td>
+                  <td className="px-4 py-3">
+                    <StockCell
+                      value={prod.stock_cantidad}
+                      editable={canToggle}
+                      saving={savingStockId === prod.id}
+                      onSave={(next) => {
+                        setSavingStockId(prod.id)
+                        stockMutation.mutate({ id: prod.id, stock: next })
+                      }}
+                    />
+                  </td>
 
                   {canToggle && (
                     <td className="px-4 py-3">
@@ -206,5 +226,55 @@ export function ProductTable({ externalFilters, isAdmin, isStock }: Props) {
         <ProductFormModal product={editTarget} onClose={() => setEditTarget(null)} />
       )}
     </>
+  )
+}
+
+// Celda de stock. Solo lectura para roles sin permiso; para ADMIN/STOCK muestra
+// un input editable y un botón "Guardar" que aparece únicamente cuando el valor cambió.
+function StockCell({
+  value,
+  editable,
+  saving,
+  onSave,
+}: {
+  value: number
+  editable: boolean
+  saving: boolean
+  onSave: (next: number) => void
+}) {
+  const [draft, setDraft] = useState(String(value))
+
+  // Si el producto se refresca (tras guardar u otra mutación) sincronizamos el input.
+  useEffect(() => { setDraft(String(value)) }, [value])
+
+  if (!editable) {
+    return <span className="text-text-secondary">{value}</span>
+  }
+
+  const parsed = Number(draft)
+  const valid = draft.trim() !== '' && Number.isInteger(parsed) && parsed >= 0
+  const dirty = parsed !== value
+
+  return (
+    <div className="flex items-center gap-2">
+      <input
+        type="number"
+        min={0}
+        value={draft}
+        disabled={saving}
+        onChange={(e) => setDraft(e.target.value)}
+        onKeyDown={(e) => { if (e.key === 'Enter' && valid && dirty) onSave(parsed) }}
+        className="w-20 rounded-lg border border-border bg-bg-input px-2 py-1 text-sm text-text-primary focus:outline-none focus:border-info transition-colors disabled:opacity-50"
+      />
+      {dirty && (
+        <button
+          onClick={() => onSave(parsed)}
+          disabled={!valid || saving}
+          className="text-xs font-medium text-info hover:text-info-hover disabled:opacity-50 transition-colors cursor-pointer"
+        >
+          {saving ? '…' : 'Guardar'}
+        </button>
+      )}
+    </div>
   )
 }
