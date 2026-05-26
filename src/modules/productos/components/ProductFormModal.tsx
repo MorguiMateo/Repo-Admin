@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import api from '../../../api/axiosInstance'
@@ -39,31 +39,25 @@ export function ProductFormModal({ product, onClose }: Props) {
     product?.ingredientes?.map((pi) => pi.ingrediente.id) ?? []
   )
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<FormFields>({
-    defaultValues: {
-      nombre: '',
-      descripcion: '',
-      precio_base: 0,
-      stock_cantidad: 0,
-      disponible: true,
-      imagenes_raw: '',
-    },
+  const { register, handleSubmit, formState: { errors } } = useForm<FormFields>({
+    defaultValues: product
+      ? {
+          nombre: product.nombre,
+          descripcion: product.descripcion ?? '',
+          precio_base: product.precio_base,
+          stock_cantidad: product.stock_cantidad,
+          disponible: product.disponible,
+          imagenes_raw: product.imagenes_url.join('\n'),
+        }
+      : {
+          nombre: '',
+          descripcion: '',
+          precio_base: 0,
+          stock_cantidad: 0,
+          disponible: true,
+          imagenes_raw: '',
+        },
   })
-
-  useEffect(() => {
-    if (product) {
-      reset({
-        nombre: product.nombre,
-        descripcion: product.descripcion ?? '',
-        precio_base: product.precio_base,
-        stock_cantidad: product.stock_cantidad,
-        disponible: product.disponible,
-        imagenes_raw: product.imagenes_url.join('\n'),
-      })
-      setSelectedCatIds(product.categorias?.map((pc) => pc.categoria.id) ?? [])
-      setSelectedIngIds(product.ingredientes?.map((pi) => pi.ingrediente.id) ?? [])
-    }
-  }, [product, reset])
 
   const { data: categoriasData } = useQuery({
     queryKey: ['categorias', { size: 100 }],
@@ -102,14 +96,32 @@ export function ProductFormModal({ product, onClose }: Props) {
       queryClient.invalidateQueries({ queryKey: ['productos'] })
       onClose()
     },
+    onError: (err) => {
+      console.error('[ProductFormModal] Error al guardar:', err)
+    },
   })
 
+  // Mapas con los datos originales del producto, para preservar es_principal /
+  // cantidad / unidad_medida_id / es_removible cuando el usuario edita sin tocar
+  // esos campos (la UI hoy no los expone).
+  const originalCatById = new Map(
+    (product?.categorias ?? []).map((pc) => [pc.categoria.id, pc])
+  )
+  const originalIngById = new Map(
+    (product?.ingredientes ?? []).map((pi) => [pi.ingrediente.id, pi])
+  )
+
   const onSubmit = (fields: FormFields) => {
-    if (selectedIngIds.length > 0 && !defaultUnidadId) {
+    // Solo bloqueamos si hay ingredientes NUEVOS (que no estaban antes) y no
+    // tenemos una unidad de medida default para asignarles.
+    const ingredientesNuevosSinUnidad = selectedIngIds.some(
+      (id) => !originalIngById.has(id),
+    )
+    if (ingredientesNuevosSinUnidad && !defaultUnidadId) {
       window.alert('No hay unidades de medida cargadas. Creá al menos una antes de asociar ingredientes.')
       return
     }
-    const unidadId = defaultUnidadId ?? 0
+
     const body: ProductForm = {
       nombre: fields.nombre,
       descripcion: fields.descripcion,
@@ -117,16 +129,32 @@ export function ProductFormModal({ product, onClose }: Props) {
       stock_cantidad: Number(fields.stock_cantidad),
       disponible: fields.disponible,
       imagenes_url: fields.imagenes_raw.split(/\r?\n/).map((u) => u.trim()).filter(Boolean),
-      categorias: selectedCatIds.map((id, idx) => ({
-        categoria_id: id,
-        es_principal: idx === 0,
-      })),
-      ingredientes: selectedIngIds.map((id) => ({
-        ingrediente_id: id,
-        es_removible: true,
-        cantidad: 1,
-        unidad_medida_id: unidadId,
-      })),
+      categorias: selectedCatIds.map((id, idx) => {
+        const original = originalCatById.get(id)
+        return {
+          categoria_id: id,
+          // Si la categoría ya estaba asociada, preservamos su es_principal.
+          // Si es nueva, la marcamos como principal solo si es la primera seleccionada.
+          es_principal: original ? original.es_principal : idx === 0,
+        }
+      }),
+      ingredientes: selectedIngIds.map((id) => {
+        const original = originalIngById.get(id)
+        if (original) {
+          return {
+            ingrediente_id: id,
+            es_removible: original.es_removible,
+            cantidad: original.cantidad,
+            unidad_medida_id: original.unidad_medida_id,
+          }
+        }
+        return {
+          ingrediente_id: id,
+          es_removible: true,
+          cantidad: 1,
+          unidad_medida_id: defaultUnidadId!,
+        }
+      }),
     }
     mutation.mutate(body)
   }

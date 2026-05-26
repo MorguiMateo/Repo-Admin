@@ -5,8 +5,16 @@ const api = axios.create({
   withCredentials: true,
 })
 
+api.interceptors.request.use((config) => {
+  console.log(`[API] ${config.method?.toUpperCase()} ${config.url}`, config.data ?? '')
+  return config
+})
+
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log(`[API] ${response.status} ${response.config.method?.toUpperCase()} ${response.config.url}`)
+    return response
+  },
   async (error) => {
     const url: string = error.config?.url ?? ''
 
