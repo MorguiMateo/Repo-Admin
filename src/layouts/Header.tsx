@@ -2,6 +2,7 @@ import { useLocation } from 'react-router-dom'
 import { useLogout } from '../modules/auth/hooks/useAuth'
 import { useAuthStore } from '../store/authStore'
 
+//record es para especificar el tipo de la key value de un objeto
 const ROUTE_TITLES: Record<string, string> = {
   '/admin/categorias':   'Categorías',
   '/admin/ingredientes': 'Ingredientes',
@@ -10,6 +11,7 @@ const ROUTE_TITLES: Record<string, string> = {
   '/admin/usuarios':     'Usuarios',
 }
 
+//muestra el titulo de la seccion actual y el boton de logout
 export function Header() {
   const logout = useLogout()
   const { user } = useAuthStore()

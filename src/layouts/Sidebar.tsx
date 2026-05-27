@@ -2,6 +2,8 @@ import { NavLink } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import { NAV_ITEMS } from './navItems'
 
+//Filtra NAV_ITEMS con hasrole para mostrar solo los modulos accesibles al usuario.
+//NavLink aplica la clase isActive automaticamente cuando la ruta coincide. 
 export function Sidebar() {
   const { user, hasRole } = useAuthStore()
 
@@ -31,7 +33,7 @@ export function Sidebar() {
           </NavLink>
         ))}
       </nav>
-
+{/*  info usuario que trae del store de zustand */}
       <div className="px-5 py-4 border-t border-border">
         <div className="flex flex-col gap-0.5 min-w-0">
           <span className="text-sm text-text-primary truncate">{user?.nombre}</span>

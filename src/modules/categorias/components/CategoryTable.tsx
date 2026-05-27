@@ -26,7 +26,7 @@ export function CategoryTable({ isAdmin }: Props) {
     },
     //
     //
-    ///ñññññññññ
+    // 409 pasa cuando el back rechaza eliminar una categoría que tiene productos asociados.
     onError: (err) => {
       if (axios.isAxiosError(err) && err.response?.status === 409) {
         setDeleteError('No se puede eliminar: la categoría tiene productos activos.')
@@ -48,6 +48,7 @@ export function CategoryTable({ isAdmin }: Props) {
   if (isLoading) return <p className="text-text-muted">Cargando...</p>
   if (isError)   return <p className="text-danger">Error al cargar categorías.</p>
 
+  //recibe lista vacia separa en padres e hijos y renderiza el padre y abajo el hijo
   const items = data?.items ?? []
   const padres  = items.filter((c) => c.parent_id === null)
   const hijos   = items.filter((c) => c.parent_id !== null)
@@ -70,9 +71,11 @@ export function CategoryTable({ isAdmin }: Props) {
 
           <tbody className="divide-y divide-border">
             {padres.map((padre) => {
+              //las subcategorías solo se almacenan si su parnet id es igual al id del padre
               const subs = hijos.filter((h) => h.parent_id === padre.id)
 
               return (
+                //con frament agrupamos la fila del padre y las subcategorias hijos 
                 <Fragment key={padre.id}>
                   {/* Fila padre */}
                   <tr className="bg-bg-surface-2 hover:bg-bg-surface transition-colors">
@@ -88,7 +91,7 @@ export function CategoryTable({ isAdmin }: Props) {
                     )}
                   </tr>
 
-                  {/* Filas subcategorías */}
+                  {/* Filas subcategorías ( o filas hijas) */}
                   {subs.map((sub) => (
                     <tr key={sub.id} className="bg-bg-surface hover:bg-bg-surface-2 transition-colors">
                       <td className="px-4 py-3 pl-10 text-text-secondary">↳ {sub.nombre}</td>

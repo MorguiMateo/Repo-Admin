@@ -6,9 +6,8 @@ export interface NavItem {
   roles: RoleCode[]
 }
 
-// Fuente de verdad de la navegación del panel. El orden define tanto el orden
-// en el sidebar como la prioridad del landing por defecto (ver AdminIndex):
-// el usuario aterriza en el primer item para el que tenga rol.
+//define el orden del sidebar.
+//label = texto que se mmuestra en sidebar
 export const NAV_ITEMS: NavItem[] = [
   { to: '/admin/categorias',   label: 'Categorías',   roles: ['ADMIN'] },
   { to: '/admin/ingredientes', label: 'Ingredientes', roles: ['ADMIN'] },

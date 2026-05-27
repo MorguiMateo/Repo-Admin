@@ -9,6 +9,8 @@ interface Props {
   onClose: () => void
 }
 
+//detecta si es creacion o edicion mirando si recibio la prop category. si la recive precarga los valores por defecto.
+
 export function CategoryFormModal({ category, onClose }: Props) {
   const queryClient = useQueryClient()
   const isEditing = !!category
@@ -40,6 +42,7 @@ export function CategoryFormModal({ category, onClose }: Props) {
     },
   })
 
+  //convierte pantet_id a numero porque los select devuelven siempre string aunque el value sea numerico.
   const onSubmit = (values: CategoryForm) => {
     mutation.mutate({
       ...values,

@@ -13,6 +13,7 @@ interface AuthState {
   hasRole: (allowed: RoleCode[]) => boolean
 }
 
+//Guarda el estado de sesion en memoria del cliente.
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   roles: [],

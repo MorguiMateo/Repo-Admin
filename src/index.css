@@ -78,7 +78,7 @@ img, svg {
   max-width: 100%;
 }
 
-/* Scrollbar delgada: carril gris muy oscuro (sidebar), thumb gris medio (border) */
+/* Scrollbar fina y oscura */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--color-bg-sidebar); }
 ::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }

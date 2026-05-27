@@ -3,6 +3,8 @@ import type { Category, CategoryForm } from '../types'
 import type { PaginatedResponse } from '../../../shared/types'
 import { toSkipLimit, wrapAsPage } from '../../../shared/types'
 
+
+//llama a los 4 enpoints. 
 export async function getAll(
   params: { page?: number; size?: number; parent_id?: number } = {},
 ): Promise<PaginatedResponse<Category>> {

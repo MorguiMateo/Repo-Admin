@@ -1,15 +1,26 @@
+//reemplazo del fetch
 import axios from 'axios'
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
+  //le dice al navegador que incluya las cookies en los request. 
+  // El backend usa cookies httpOnly para la sesion, estas las maneja automaticamente el navegador
+  // el front nunca ve ni guarda tokens en localStorage
   withCredentials: true,
 })
 
+//logea en consola para debuggear 
 api.interceptors.request.use((config) => {
   console.log(`[API] ${config.method?.toUpperCase()} ${config.url}`, config.data ?? '')
   return config
 })
 
+//Maneja solo los 401. si el error viene de login o refresh, lo deja pasar.
+//si ya se reintento lo deja pasar para que no haya loop infinito
+//si no llama a al refresh para renovar access token y luego reintanta la request.
+//si el refesh falla redirige al login.
+
+//si hay error lo maneja sino retorna sin mas con un consolo log 
 api.interceptors.response.use(
   (response) => {
     console.log(`[API] ${response.status} ${response.config.method?.toUpperCase()} ${response.config.url}`)

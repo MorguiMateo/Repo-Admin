@@ -29,7 +29,7 @@ export function useAuthInit() {
   return { loading: isLoading }
 }
 
-// Devuelve handler de logout: API, limpia store/caché y redirige a /login.
+//  llama a POST /auth/logout, lpia la store y la cache y navega al login
 export function useLogout() {
   const { clearAuth } = useAuthStore()
   const queryClient = useQueryClient()

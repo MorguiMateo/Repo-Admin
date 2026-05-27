@@ -17,7 +17,7 @@ export default function LoginPage() {
   // handleSubmit Envuelve el onSubmit valida si esta OK y llama a la funcion con los datos
   // errors errores d validacion por campo ejempl eerrros.mail
   // isSubmitting : es true mientras corre el onSubmit async. cuando termina termine bien o mal devuelve false
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginForm>()
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginForm>()    
 
   // data ya llega con el mail y la pass validadas
   const onSubmit = async (data: LoginForm) => {
