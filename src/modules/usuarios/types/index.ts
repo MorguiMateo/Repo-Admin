@@ -24,5 +24,15 @@ export interface AdminUser {
 
 // formulario para asignar un rol a un usuario (el back recibe la lista completa final)
 export interface AssignRoleForm {
-  rol_codigo: RoleCode
+  rol_codigo: Exclude<RoleCode, 'ADMIN'>
+}
+
+// formulario para crear un nuevo usuario desde el panel de admin
+export interface CreateUserForm {
+  nombre: string
+  apellido: string
+  email: string
+  password: string
+  celular: string
+  rol: Exclude<RoleCode, 'ADMIN'>
 }

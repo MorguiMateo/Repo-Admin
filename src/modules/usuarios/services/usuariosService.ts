@@ -1,5 +1,5 @@
 import api from '../../../api/axiosInstance'
-import type { AdminUser } from '../types'
+import type { AdminUser, CreateUserForm } from '../types'
 import type { RoleCode } from '../../auth/types'
 import type { PaginatedResponse } from '../../../shared/types'
 import { toSkipLimit, wrapAsPage } from '../../../shared/types'
@@ -32,4 +32,19 @@ export async function setRoles(id: number, roles: RoleCode[]): Promise<AdminUser
 // DELETE /admin/usuarios/{id} — soft delete (setea deleted_at = now()).
 export async function softDelete(id: number): Promise<void> {
   await api.delete(`/admin/usuarios/${id}`)
+}
+
+// POST /auth/register + PATCH /admin/usuarios/{id}/roles si el rol no es CLIENT.
+// El register siempre asigna CLIENT; si se eligió otro rol lo reemplazamos.
+export async function createUser(form: CreateUserForm): Promise<AdminUser> {
+  const { rol, celular, ...registerData } = form
+  const { data: newUser } = await api.post<AdminUser>('/auth/register', {
+    ...registerData,
+    celular: celular || null,
+  })
+  if (rol !== 'CLIENT') {
+    const { data: updated } = await api.patch<AdminUser>(`/admin/usuarios/${newUser.id}/roles`, { roles: [rol] })
+    return updated
+  }
+  return newUser
 }

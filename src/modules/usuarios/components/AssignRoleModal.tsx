@@ -55,7 +55,6 @@ export function AssignRoleModal({ user, onClose }: Props) {
               {...register('rol_codigo', { required: 'Seleccioná un rol' })}
               className="w-full rounded-lg border border-border bg-bg-input px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-info transition-colors"
             >
-              <option value="ADMIN">ADMIN</option>
               <option value="STOCK">STOCK</option>
               <option value="PEDIDOS">PEDIDOS</option>
               <option value="CLIENT">CLIENT</option>
