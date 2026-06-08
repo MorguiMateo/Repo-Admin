@@ -1,119 +1,77 @@
-import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { getAll } from '../services/pedidosService'
-import { PedidoRow } from '../components/PedidoRow'
+import { PedidoCard } from '../components/PedidoCard'
 import { useAuthStore } from '../../../store/authStore'
+import type { Order, OrderStatusCode } from '../types'
 
-const ESTADOS: { value: string; label: string }[] = [
-  { value: '', label: 'Todos' },
-  { value: 'PENDIENTE', label: 'Pendiente' },
-  { value: 'CONFIRMADO', label: 'Confirmado' },
-  { value: 'EN_PREP', label: 'En preparación' },
-  { value: 'EN_CAMINO', label: 'En camino' },
-  { value: 'ENTREGADO', label: 'Entregado' },
-  { value: 'CANCELADO', label: 'Cancelado' },
+const COLUMNS: { code: OrderStatusCode; label: string; dot: string }[] = [
+  { code: 'PENDIENTE',  label: 'Pendiente',      dot: 'bg-warning' },
+  { code: 'CONFIRMADO', label: 'Confirmado',      dot: 'bg-info' },
+  { code: 'EN_PREP',    label: 'En preparación',  dot: 'bg-info' },
+  { code: 'EN_CAMINO',  label: 'En camino',       dot: 'bg-enroute' },
 ]
 
 export default function PedidosPage() {
   const canAdvance = useAuthStore((s) => s.hasRole(['ADMIN', 'PEDIDOS']))
-  const [estado, setEstado] = useState<string>('')
-  const [page, setPage] = useState(1)
-
-  const filters = { estado: estado || undefined, page, size: 20 }
 
   const { data, isLoading, isError, isFetching } = useQuery({
-    queryKey: ['pedidos', filters],
-    queryFn: () => getAll(filters),
-    // Auto-refresh: vuelve a consultar los pedidos cada 5s para reflejar
-    // nuevos pedidos o cambios de estado sin recargar la página.
+    queryKey: ['pedidos', { kanban: true }],
+    queryFn: () => getAll({ page: 1, size: 200 }),
     refetchInterval: 5000,
   })
 
   const items = data?.items ?? []
-  const totalPages = data?.pages ?? 1
+
+  const byState = Object.fromEntries(
+    COLUMNS.map((col) => [col.code, items.filter((p) => p.estado_codigo === col.code)])
+  ) as Record<OrderStatusCode, Order[]>
 
   return (
-    <div className="flex flex-col gap-6 p-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <h1 className="text-xl font-semibold text-text-primary">Pedidos</h1>
-          {isFetching && !isLoading && (
-            <span className="text-xs text-text-muted animate-pulse">Actualizando…</span>
-          )}
-        </div>
-        <div className="flex items-center gap-3">
-          <label className="text-sm text-text-secondary">Estado</label>
-          <select
-            value={estado}
-            onChange={(e) => { setEstado(e.target.value); setPage(1) }}
-            className="px-3 py-1.5 rounded-lg bg-bg-input border border-border text-text-primary text-sm focus:outline-none focus:border-primary"
-          >
-            {ESTADOS.map((opt) => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
-        </div>
+    <div className="flex flex-col h-full gap-4">
+      <div className="flex items-center gap-3 flex-shrink-0">
+        <h1 className="text-xl font-semibold text-text-primary">Pedidos</h1>
+        {isFetching && !isLoading && (
+          <span className="text-xs text-text-muted animate-pulse">Actualizando…</span>
+        )}
       </div>
 
       {isLoading && <p className="text-text-muted">Cargando...</p>}
       {isError && <p className="text-danger">Error al cargar pedidos.</p>}
 
       {!isLoading && !isError && (
-        <>
-          <div className="rounded-xl border border-border overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-bg-surface text-text-muted uppercase text-xs tracking-wide">
-                <tr>
-                  <th className="px-4 py-3 text-left">#</th>
-                  <th className="px-4 py-3 text-left">Fecha</th>
-                  <th className="px-4 py-3 text-left">Pago</th>
-                  <th className="px-4 py-3 text-left">Total</th>
-                  <th className="px-4 py-3 text-left">Estado</th>
-                  {canAdvance && <th className="px-4 py-3 text-left">Acciones</th>}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {items.length === 0 && (
-                  <tr>
-                    <td
-                      colSpan={canAdvance ? 6 : 5}
-                      className="px-4 py-8 text-center text-text-muted"
-                    >
-                      No hay pedidos para mostrar.
-                    </td>
-                  </tr>
-                )}
-                {items.map((pedido) => (
-                  <PedidoRow
-                    key={pedido.id}
-                    pedido={pedido}
-                    canAdvance={canAdvance}
-                  />
-                ))}
-              </tbody>
-            </table>
-          </div>
+        <div className="flex gap-4 flex-1 min-h-0">
+          {COLUMNS.map((col) => {
+            const colItems = byState[col.code]
+            return (
+              <div
+                key={col.code}
+                className="flex-1 flex flex-col min-h-0 bg-bg-surface border border-border rounded-xl overflow-hidden"
+              >
+                <div className="flex items-center gap-2.5 px-4 py-3 border-b border-border flex-shrink-0">
+                  <span className={`w-2 h-2 rounded-full flex-shrink-0 ${col.dot}`} />
+                  <span className="font-semibold text-sm text-text-primary">{col.label}</span>
+                  <span className="ml-auto text-xs text-text-muted bg-bg-surface-2 px-2 py-0.5 rounded-full">
+                    {colItems.length}
+                  </span>
+                </div>
 
-          {totalPages > 1 && (
-            <div className="flex items-center justify-end gap-3 text-sm text-text-secondary">
-              <button
-                disabled={page === 1}
-                onClick={() => setPage((p) => p - 1)}
-                className="px-3 py-1 rounded-lg border border-border hover:bg-bg-surface-2 disabled:opacity-40 transition-colors cursor-pointer"
-              >
-                ← Anterior
-              </button>
-              <span>Página {page} de {totalPages}</span>
-              <button
-                disabled={page === totalPages}
-                onClick={() => setPage((p) => p + 1)}
-                className="px-3 py-1 rounded-lg border border-border hover:bg-bg-surface-2 disabled:opacity-40 transition-colors cursor-pointer"
-              >
-                Siguiente →
-              </button>
-            </div>
-          )}
-        </>
+                <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-2">
+                  {colItems.length === 0 ? (
+                    <p className="text-xs text-text-muted text-center py-8">Sin pedidos</p>
+                  ) : (
+                    colItems.map((pedido) => (
+                      <PedidoCard
+                        key={pedido.id}
+                        pedido={pedido}
+                        canAdvance={canAdvance}
+                      />
+                    ))
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </div>
       )}
     </div>
   )
