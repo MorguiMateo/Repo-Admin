@@ -1,6 +1,16 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import axios from 'axios'
 import { advanceStatus, cancelOrder } from '../services/pedidosService'
 import type { OrderStatusCode } from '../types'
+
+// Extrae el mensaje de error del backend (FastAPI devuelve { detail }) para mostrarlo al usuario.
+function getErrorMessage(err: unknown): string {
+  if (axios.isAxiosError(err)) {
+    const detail = err.response?.data?.detail
+    if (typeof detail === 'string') return detail
+  }
+  return 'No se pudo actualizar el pedido.'
+}
 
 interface Props {
   pedidoId: number
@@ -14,20 +24,18 @@ interface Props {
 const NEXT: Partial<Record<OrderStatusCode, OrderStatusCode>> = {
   PENDIENTE: 'CONFIRMADO',
   CONFIRMADO: 'EN_PREP',
-  EN_PREP: 'EN_CAMINO',
-  EN_CAMINO: 'ENTREGADO',
+  EN_PREP: 'ENTREGADO',
 }
 
 // keys OrderStatusCode y de tipo string
 const NEXT_LABEL: Partial<Record<OrderStatusCode, string>> = {
   PENDIENTE: 'Confirmar',
   CONFIRMADO: 'Iniciar preparación',
-  EN_PREP: 'Enviar',
-  EN_CAMINO: 'Marcar entregado',
+  EN_PREP: 'Marcar entregado',
 }
 
-// Puede cancelar siempre que este en pendiente o confirmado
-const CAN_CANCEL: OrderStatusCode[] = ['PENDIENTE', 'CONFIRMADO']
+// Puede cancelar mientras este en pendiente, confirmado o en preparación (cocina)
+const CAN_CANCEL: OrderStatusCode[] = ['PENDIENTE', 'CONFIRMADO', 'EN_PREP']
 
 //recibe id y estado. el id para saber a que pedido apuntar y el estado para saber que botones mosatrar
 export function AdvanceStatusButton({ pedidoId, estadoActual }: Props) {
@@ -54,6 +62,7 @@ export function AdvanceStatusButton({ pedidoId, estadoActual }: Props) {
   })
 
   const isPending = advanceMutation.isPending || cancelMutation.isPending
+  const error = advanceMutation.error ?? cancelMutation.error
 
   //estado al que se avanza
   const nextState = NEXT[estadoActual]
@@ -82,27 +91,31 @@ export function AdvanceStatusButton({ pedidoId, estadoActual }: Props) {
   }
 
   return (
-    <div className="flex items-center gap-2">
-      {/*el boton de avance solo aparece si nextState no es undefined */}
-      {nextState && (
-        <button
-          onClick={handleAdvance}
-          disabled={isPending}
-          className="px-3 py-1 text-xs font-medium rounded-lg bg-primary hover:bg-primary-hover text-white disabled:opacity-50 cursor-pointer transition-colors"
-        >
-          {isPending ? '...' : nextLabel}
-        </button>
-      )}
-      {/* solo muestra cancelar mientras canCancel sea true. si esta en estado isPending se deesabilita tmb */}
-      {canCancel && (
-        <button
-          onClick={handleCancel}
-          disabled={isPending}
-          className="px-3 py-1 text-xs font-medium rounded-lg border border-danger text-danger hover:bg-danger hover:text-white disabled:opacity-50 cursor-pointer transition-colors"
-        >
-          Cancelar
-        </button>
-      )}
+    <div className="flex flex-col gap-1">
+      <div className="flex items-center gap-2">
+        {/*el boton de avance solo aparece si nextState no es undefined */}
+        {nextState && (
+          <button
+            onClick={handleAdvance}
+            disabled={isPending}
+            className="px-3 py-1 text-xs font-medium rounded-lg bg-primary hover:bg-primary-hover text-white disabled:opacity-50 cursor-pointer transition-colors"
+          >
+            {isPending ? '...' : nextLabel}
+          </button>
+        )}
+        {/* solo muestra cancelar mientras canCancel sea true. si esta en estado isPending se deesabilita tmb */}
+        {canCancel && (
+          <button
+            onClick={handleCancel}
+            disabled={isPending}
+            className="px-3 py-1 text-xs font-medium rounded-lg border border-danger text-danger hover:bg-danger hover:text-white disabled:opacity-50 cursor-pointer transition-colors"
+          >
+            Cancelar
+          </button>
+        )}
+      </div>
+      {/* si el backend rechaza la transición, mostramos el motivo en vez de fallar en silencio */}
+      {error && <p className="text-xs text-danger">{getErrorMessage(error)}</p>}
     </div>
   )
 }

@@ -8,7 +8,7 @@ const COLUMNS: { code: OrderStatusCode; label: string; dot: string }[] = [
   { code: 'PENDIENTE',  label: 'Pendiente',      dot: 'bg-warning' },
   { code: 'CONFIRMADO', label: 'Confirmado',      dot: 'bg-info' },
   { code: 'EN_PREP',    label: 'En preparación',  dot: 'bg-info' },
-  { code: 'EN_CAMINO',  label: 'En camino',       dot: 'bg-enroute' },
+  { code: 'ENTREGADO',  label: 'Entregados',      dot: 'bg-success' },
 ]
 
 export default function PedidosPage() {

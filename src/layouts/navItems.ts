@@ -13,5 +13,6 @@ export const NAV_ITEMS: NavItem[] = [
   { to: '/admin/ingredientes', label: 'Ingredientes', roles: ['ADMIN'] },
   { to: '/admin/productos',    label: 'Productos',    roles: ['ADMIN', 'STOCK'] },
   { to: '/admin/pedidos',      label: 'Pedidos',      roles: ['ADMIN', 'PEDIDOS'] },
+  { to: '/admin/cocina',       label: 'Cocina',       roles: ['ADMIN', 'PEDIDOS'] },
   { to: '/admin/usuarios',     label: 'Usuarios',     roles: ['ADMIN'] },
 ]

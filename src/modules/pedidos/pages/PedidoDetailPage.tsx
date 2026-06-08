@@ -9,7 +9,6 @@ const STATUS_CLASSES: Record<OrderStatusCode, string> = {
   PENDIENTE: 'bg-warning-muted text-warning',
   CONFIRMADO: 'bg-info-muted text-info',
   EN_PREP: 'bg-info-muted text-info',
-  EN_CAMINO: 'bg-enroute-muted text-enroute',
   ENTREGADO: 'bg-success-muted text-success',
   CANCELADO: 'bg-danger-muted text-danger',
 }
@@ -18,7 +17,6 @@ const STATUS_LABEL: Record<OrderStatusCode, string> = {
   PENDIENTE: 'Pendiente',
   CONFIRMADO: 'Confirmado',
   EN_PREP: 'En preparación',
-  EN_CAMINO: 'En camino',
   ENTREGADO: 'Entregado',
   CANCELADO: 'Cancelado',
 }

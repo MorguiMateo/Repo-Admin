@@ -4,7 +4,6 @@ export type OrderStatusCode =
   | 'PENDIENTE'
   | 'CONFIRMADO'
   | 'EN_PREP'
-  | 'EN_CAMINO'
   | 'ENTREGADO'
   | 'CANCELADO'
 

@@ -47,10 +47,6 @@
   --color-info-hover:      #2563EB;
   --color-info-muted:      #3B82F626;
 
-  /* En camino: violeta (enroute), violeta suave de fondo (enroute-muted) — pedido EN CAMINO */
-  --color-enroute:         #8B5CF6;
-  --color-enroute-muted:   #8B5CF626;
-
   /* Layout — sin color: ancho sidebar, alto header */
   --sidebar-width:          280px;
   --header-height:          80px;

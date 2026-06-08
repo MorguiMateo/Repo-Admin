@@ -9,6 +9,7 @@ import IngredientesPage from './modules/ingredientes/pages/IngredientesPage'
 import ProductosPage from './modules/productos/pages/ProductosPage'
 import PedidosPage from './modules/pedidos/pages/PedidosPage'
 import PedidoDetailPage from './modules/pedidos/pages/PedidoDetailPage'
+import CocinaPage from './modules/cocina/pages/CocinaPage'
 import UsuariosPage from './modules/usuarios/pages/UsuariosPage'
 
 export const router = createBrowserRouter([
@@ -46,6 +47,10 @@ export const router = createBrowserRouter([
           {
             path: 'pedidos/:id',
             element: <RequireRole allowed={['ADMIN', 'PEDIDOS']}><PedidoDetailPage /></RequireRole>,
+          },
+          {
+            path: 'cocina',
+            element: <RequireRole allowed={['ADMIN', 'PEDIDOS']}><CocinaPage /></RequireRole>,
           },
           {
             path: 'usuarios',

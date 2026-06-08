@@ -25,8 +25,16 @@ export function PedidoCard({ pedido, canAdvance }: Props) {
         <span className="text-xs text-text-muted">{hora}</span>
       </div>
       <span className="text-sm font-medium text-text-primary">${pedido.total.toFixed(2)}</span>
-      {canAdvance && (
-        <AdvanceStatusButton pedidoId={pedido.id} estadoActual={pedido.estado_codigo} />
+      {/* Los pedidos en preparación se gestionan desde el módulo Cocina:
+          acá solo se indica su estado, sin botones de avanzar/cancelar. */}
+      {pedido.estado_codigo === 'EN_PREP' ? (
+        <span className="self-start text-xs font-medium text-info bg-info-muted px-2 py-0.5 rounded-full">
+          En cocina
+        </span>
+      ) : (
+        canAdvance && (
+          <AdvanceStatusButton pedidoId={pedido.id} estadoActual={pedido.estado_codigo} />
+        )
       )}
     </div>
   )
