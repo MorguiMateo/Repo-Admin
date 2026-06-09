@@ -8,6 +8,7 @@ import CategoriasPage from './modules/categorias/pages/CategoriasPage'
 import IngredientesPage from './modules/ingredientes/pages/IngredientesPage'
 import ProductosPage from './modules/productos/pages/ProductosPage'
 import PedidosPage from './modules/pedidos/pages/PedidosPage'
+import HistorialPage from './modules/pedidos/pages/HistorialPage'
 import PedidoDetailPage from './modules/pedidos/pages/PedidoDetailPage'
 import CocinaPage from './modules/cocina/pages/CocinaPage'
 import UsuariosPage from './modules/usuarios/pages/UsuariosPage'
@@ -43,6 +44,10 @@ export const router = createBrowserRouter([
           {
             path: 'pedidos',
             element: <RequireRole allowed={['ADMIN', 'PEDIDOS']}><PedidosPage /></RequireRole>,
+          },
+          {
+            path: 'historial',
+            element: <RequireRole allowed={['ADMIN', 'PEDIDOS']}><HistorialPage /></RequireRole>,
           },
           {
             path: 'pedidos/:id',

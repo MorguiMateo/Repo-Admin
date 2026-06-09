@@ -1,8 +1,12 @@
 import { Outlet } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 import { Header } from './Header'
+import { usePedidosSocket } from '../modules/pedidos/hooks/usePedidosSocket'
 
 export default function AdminLayout() {
+  // Una sola conexión WebSocket para todo el panel: refresca pedidos en vivo.
+  usePedidosSocket()
+
   return (
     <div className="flex h-screen bg-bg-base overflow-hidden">
       <Sidebar />

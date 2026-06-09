@@ -8,7 +8,6 @@ const COLUMNS: { code: OrderStatusCode; label: string; dot: string }[] = [
   { code: 'PENDIENTE',  label: 'Pendiente',      dot: 'bg-warning' },
   { code: 'CONFIRMADO', label: 'Confirmado',      dot: 'bg-info' },
   { code: 'EN_PREP',    label: 'En preparación',  dot: 'bg-info' },
-  { code: 'ENTREGADO',  label: 'Entregados',      dot: 'bg-success' },
 ]
 
 export default function PedidosPage() {
@@ -17,7 +16,6 @@ export default function PedidosPage() {
   const { data, isLoading, isError, isFetching } = useQuery({
     queryKey: ['pedidos', { kanban: true }],
     queryFn: () => getAll({ page: 1, size: 200 }),
-    refetchInterval: 5000,
   })
 
   const items = data?.items ?? []

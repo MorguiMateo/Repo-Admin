@@ -30,9 +30,6 @@ export default function PedidoDetailPage() {
     queryKey: ['pedido', pedidoId],
     queryFn: () => getById(pedidoId),
     enabled: !isNaN(pedidoId),
-    // Auto-refresh: igual que la lista, re-consulta cada 5s para reflejar
-    // cambios de estado del pedido (avance/cancelación) sin recargar la página.
-    refetchInterval: 5000,
   })
 
   if (isLoading) return <p className="p-6 text-text-muted">Cargando...</p>
