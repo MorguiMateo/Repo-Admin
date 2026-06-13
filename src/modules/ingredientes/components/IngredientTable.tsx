@@ -10,6 +10,10 @@ interface Props {
   isAdmin: boolean
 }
 
+// Umbral genérico para marcar "stock bajo". Ajustable cuando el back defina la
+// unidad real de stock por ingrediente.
+const LOW_STOCK_THRESHOLD = 10
+
 export function IngredientTable({ isAdmin }: Props) {
   const queryClient = useQueryClient()
   //la pagina arranca por 1 
@@ -68,6 +72,7 @@ export function IngredientTable({ isAdmin }: Props) {
               <th className="px-4 py-2 text-left font-medium">Nombre</th>
               <th className="px-4 py-2 text-left font-medium">Descripción</th>
               <th className="px-4 py-2 text-left font-medium">Alérgeno</th>
+              <th className="px-4 py-2 text-left font-medium">Stock</th>
               {isAdmin && <th className="px-4 py-2 text-right font-medium">Acciones</th>}
             </tr>
           </thead>
@@ -82,6 +87,9 @@ export function IngredientTable({ isAdmin }: Props) {
                   ) : (
                     <span className="text-text-muted">—</span>
                   )}
+                </td>
+                <td className="px-4 py-2.5">
+                  <StockBadge stock={ing.stock} />
                 </td>
 
                 {isAdmin && (
@@ -136,4 +144,23 @@ export function IngredientTable({ isAdmin }: Props) {
       )}
     </>
   )
+}
+
+// Muestra el stock del ingrediente (solo lectura). El back todavía no expone el
+// campo, por eso degrada a "—" cuando llega null/undefined.
+function StockBadge({ stock }: { stock?: number | null }) {
+  if (stock == null) {
+    return <span className="text-text-muted">—</span>
+  }
+  if (stock === 0) {
+    return (
+      <span className="text-xs text-danger bg-danger-muted px-2 py-0.5 rounded">
+        Agotado
+      </span>
+    )
+  }
+  if (stock <= LOW_STOCK_THRESHOLD) {
+    return <span className="text-warning">{stock}</span>
+  }
+  return <span className="text-text-secondary">{stock}</span>
 }

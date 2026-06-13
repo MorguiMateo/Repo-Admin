@@ -3,6 +3,7 @@ export interface Ingredient {
   nombre: string
   descripcion: string | null
   es_alergeno: boolean // si es true mostrar advertencia en UI
+  stock?: number | null // stock disponible del ingrediente (lo expondrá el back)
   created_at: string
   updated_at: string
 }

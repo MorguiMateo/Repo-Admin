@@ -1,9 +1,10 @@
 import { useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useAuthStore } from '../../../store/authStore'
+import { API_BASE_URL } from '../../../api/axiosInstance'
 
-// VITE_API_URL = http://localhost:8000/api/v1 → ws://localhost:8000/api/v1/pedidos/ws
-const WS_URL = (import.meta.env.VITE_API_URL as string).replace(/^http/, 'ws') + '/pedidos/ws'
+// Deriva el WS de la misma base que el axios: http(s)://.../api/v1 → ws(s)://.../api/v1/pedidos/ws
+const WS_URL = API_BASE_URL.replace(/^http/, 'ws') + '/pedidos/ws'
 
 const TRACKED_EVENTS = ['ORDER_CREATED', 'ORDER_STATE_CHANGED']
 

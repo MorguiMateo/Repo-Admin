@@ -8,7 +8,7 @@ import { useAuthStore } from '../../../store/authStore'
 export default function CocinaPage() {
   const canAdvance = useAuthStore((s) => s.hasRole(['ADMIN', 'PEDIDOS']))
 
-  const { data, isLoading, isError, isFetching } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['pedidos', { cocina: true }],
     queryFn: () => getAll({ estado: 'EN_PREP', size: 200 }),
   })
@@ -23,9 +23,6 @@ export default function CocinaPage() {
         <span className="text-xs text-text-muted bg-bg-surface-2 px-2 py-0.5 rounded-full">
           {items.length}
         </span>
-        {isFetching && !isLoading && (
-          <span className="text-xs text-text-muted animate-pulse">Actualizando…</span>
-        )}
       </div>
 
       {isLoading && <p className="text-text-muted">Cargando...</p>}

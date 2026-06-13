@@ -26,7 +26,7 @@ export default function PedidoDetailPage() {
   const pedidoId = Number(id)
   const canAdvance = useAuthStore((s) => s.hasRole(['ADMIN', 'PEDIDOS']))
 
-  const { data: pedido, isLoading, isError, isFetching } = useQuery({
+  const { data: pedido, isLoading, isError } = useQuery({
     queryKey: ['pedido', pedidoId],
     queryFn: () => getById(pedidoId),
     enabled: !isNaN(pedidoId),
@@ -52,9 +52,6 @@ export default function PedidoDetailPage() {
         <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${statusClass}`}>
           {statusLabel}
         </span>
-        {isFetching && !isLoading && (
-          <span className="text-xs text-text-muted animate-pulse">Actualizando…</span>
-        )}
         {canAdvance && (
           <AdvanceStatusButton pedidoId={pedido.id} estadoActual={pedido.estado_codigo} />
         )}

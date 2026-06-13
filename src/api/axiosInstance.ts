@@ -1,8 +1,13 @@
 //reemplazo del fetch
 import axios from 'axios'
 
+// Única fuente de verdad para la base de la API. Configurable por entorno
+// (VITE_API_URL) con fallback a localhost para desarrollo.
+export const API_BASE_URL =
+  (import.meta.env.VITE_API_URL as string) || 'http://localhost:8000/api/v1'
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: API_BASE_URL,
   //le dice al navegador que incluya las cookies en los request. 
   // El backend usa cookies httpOnly para la sesion, estas las maneja automaticamente el navegador
   // el front nunca ve ni guarda tokens en localStorage
