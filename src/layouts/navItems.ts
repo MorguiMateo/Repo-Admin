@@ -9,6 +9,7 @@ export interface NavItem {
 //define el orden del sidebar.
 //label = texto que se mmuestra en sidebar
 export const NAV_ITEMS: NavItem[] = [
+  { to: '/admin/dashboard',    label: 'Dashboard',    roles: ['ADMIN'] },
   { to: '/admin/categorias',   label: 'Categorías',   roles: ['ADMIN'] },
   { to: '/admin/ingredientes', label: 'Ingredientes', roles: ['ADMIN'] },
   { to: '/admin/productos',    label: 'Productos',    roles: ['ADMIN', 'STOCK'] },
