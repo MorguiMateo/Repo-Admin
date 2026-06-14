@@ -1,10 +1,5 @@
 import type { Order } from '../../pedidos/types'
-import type {
-  DashboardKpis,
-  PedidosPorDiaSemana,
-  ProductoVendido,
-  VentasPorDia,
-} from '../types'
+import type { DashboardKpis, PedidosPorDiaSemana, ProductoVendido } from '../types'
 
 function montoTotal(order: Order): number {
   return Number(order.total) || 0
@@ -12,19 +7,6 @@ function montoTotal(order: Order): number {
 
 function sumarIngresos(orders: Order[]): number {
   return orders.reduce((acc, order) => acc + montoTotal(order), 0)
-}
-
-export function ventasPorDia(orders: Order[]): VentasPorDia[] {
-  const acumulado = new Map<string, number>()
-
-  for (const order of orders) {
-    const fecha = order.created_at.slice(0, 10)
-    acumulado.set(fecha, (acumulado.get(fecha) ?? 0) + montoTotal(order))
-  }
-
-  return Array.from(acumulado, ([fecha, total]) => ({ fecha, total })).sort((a, b) =>
-    a.fecha.localeCompare(b.fecha),
-  )
 }
 
 export function kpis(orders: Order[]): DashboardKpis {

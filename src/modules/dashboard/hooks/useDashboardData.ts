@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { getAllPedidos } from '../services/dashboardService'
-import { kpis, pedidosPorDiaSemana, topProductos, ventasPorDia } from '../utils/aggregations'
+import { kpis, pedidosPorDiaSemana, topProductos } from '../utils/aggregations'
 
 export function useDashboardData() {
   const query = useQuery({
@@ -13,7 +13,6 @@ export function useDashboardData() {
   return {
     ...query,
     kpis: kpis(orders),
-    ventas: ventasPorDia(orders),
     topProductos: topProductos(orders, 5),
     pedidosPorDiaSemana: pedidosPorDiaSemana(orders),
   }

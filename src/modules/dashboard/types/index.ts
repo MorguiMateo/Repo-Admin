@@ -1,8 +1,3 @@
-export interface VentasPorDia {
-  fecha: string
-  total: number
-}
-
 export interface ProductoVendido {
   nombre: string
   cantidad: number
