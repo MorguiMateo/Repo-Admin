@@ -1,79 +1,88 @@
-# React + TypeScript + Vite
+# Food Store — Panel de Administración
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Panel interno para administrar la tienda: dashboard con gráficos, CRUD de catálogo
+(con imágenes en Cloudinary), gestión de stock, ciclo de vida de pedidos (FSM) y
+feed de pedidos en **tiempo real** vía WebSocket. Acceso por **rol** (ADMIN, STOCK, PEDIDOS).
 
-Currently, two official plugins are available:
+Es el frontend de administración del sistema Food Store (requiere el **backend** corriendo):
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+| Repo | Rol | Puerto |
+| :--- | :--- | :--- |
+| integrador2 | Backend FastAPI | `8000` |
+| Repo-Store | Storefront del cliente | `5173` |
+| **Repo-Admin** (este) | Panel de administración | `5174` |
 
-## React Compiler
+## Stack
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+- **React 19** + **TypeScript** + **Vite**
+- **TanStack Query** (estado del servidor) · **Zustand** (sesión) · **React Hook Form**
+- **Recharts** (gráficos del dashboard) · **Axios** (cookies httpOnly, refresh 401) · **Tailwind CSS v4**
+- Arquitectura **Feature-Sliced**: `src/modules/<feature>/{types,services,hooks,components,pages}`
 
-Note: This will impact Vite dev & build performances.
+## Requisitos
 
-## Expanding the ESLint configuration
+- **Node.js 20+**
+- **pnpm** (recomendado) — `npm i -g pnpm`
+- El **backend** corriendo en `http://localhost:8000` (ver el repo `integrador2`).
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Cómo levantarlo
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+```bash
+# 1) Dependencias
+pnpm install
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+# 2) Variables de entorno
+cp .env.example .env
+#   por defecto apunta a http://localhost:8000/api/v1 — ajustar si el backend está en otro host
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# 3) Dev server (en el puerto 5174 para no chocar con el Store)
+pnpm dev --port 5174
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+- App: <http://localhost:5174>
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Otros scripts: `pnpm build` (typecheck + build de producción) · `pnpm preview` · `pnpm lint`.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+> Si no pasás `--port`, Vite usa el `5173`; si el Store ya lo ocupa, elige el siguiente libre.
+> Si preferís npm: `npm install` + `npm run dev -- --port 5174`.
+
+## Acceso
+
+Usar las credenciales del seed del backend (rol ADMIN):
+
+```
+email:    admin@foodstore.com
+password: admin123
 ```
 
+## Variables de entorno
 
+| Variable | Descripción | Default |
+| :--- | :--- | :--- |
+| `VITE_API_URL` | URL base de la API. **Debe incluir** `/api/v1`. | `http://localhost:8000/api/v1` |
 
-DRIVE: https://drive.google.com/drive/u/0/folders/1rD6m_CmaMqE0NhEshcEeYeRTF7zvpcle
+## Estructura
+
+```
+src/
+├── api/                    # axiosInstance (cookies + refresh 401)
+├── store/                  # authStore
+└── modules/
+    ├── auth/               # login + guards por rol
+    ├── dashboard/          # KPIs + gráficos Recharts (landing del ADMIN)
+    ├── categorias/  ingredientes/  productos/   # CRUD + upload Cloudinary
+    ├── pedidos/            # gestión FSM + feed WS (usePedidosSocket)
+    ├── cocina/             # vista de preparación
+    └── usuarios/           # gestión de usuarios y roles
+```
+
+## Notas
+
+- La sesión se maneja con **cookies httpOnly**; Axios usa `withCredentials: true`.
+- El feed de pedidos en tiempo real escucha los eventos del WebSocket del backend
+  (`/api/v1/pedidos/ws`) y refresca las vistas sin recargar.
+
+## Entrega
+
+- Carpeta del proyecto (Drive): <https://drive.google.com/drive/u/0/folders/1rD6m_CmaMqE0NhEshcEeYeRTF7zvpcle>
+- 🎥 Video demo (10–15 min): _pendiente de subir — pegar el link acá_
