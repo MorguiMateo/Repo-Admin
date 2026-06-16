@@ -1,14 +1,29 @@
-export interface ProductoVendido {
+export interface ResumenKpis {
+  ventas_hoy: number
+  ticket_promedio: number
+  pedidos_activos: number
+  ventas_mes: number
+}
+
+export interface VentaPeriodo {
+  periodo: string
+  total_ventas: number
+  cantidad_pedidos: number
+}
+
+export interface ProductoTop {
   nombre: string
-  cantidad: number
-}
-
-export interface PedidosPorDiaSemana {
-  dia: string
-  cantidad: number
-}
-
-export interface DashboardKpis {
+  cantidad_vendida: number
   ingresos: number
-  pedidos: number
+}
+
+export interface PedidoPorEstado {
+  estado_codigo: string
+  cantidad: number
+}
+
+export interface IngresoFormaPago {
+  forma_pago_codigo: string
+  total: number
+  cantidad: number
 }

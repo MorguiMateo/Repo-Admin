@@ -5,6 +5,7 @@ import api from '../../../api/axiosInstance'
 import { create, update } from '../services/productosService'
 import { getAll as getCategorias } from '../../categorias/services/categoriasService'
 import { getAll as getIngredientes } from '../../ingredientes/services/ingredientesService'
+import { ImageUploader } from '../../../shared/ImageUploader'
 import type { Product, ProductForm } from '../types'
 
 interface UnidadMedida {
@@ -25,7 +26,6 @@ type FormFields = {
   precio_base: number
   stock_cantidad: number
   disponible: boolean
-  imagenes_raw: string
 }
 
 export function ProductFormModal({ product, onClose }: Props) {
@@ -38,6 +38,7 @@ export function ProductFormModal({ product, onClose }: Props) {
   const [selectedIngIds, setSelectedIngIds] = useState<number[]>(
     product?.ingredientes?.map((pi) => pi.ingrediente.id) ?? []
   )
+  const [imagenes, setImagenes] = useState<string[]>(product?.imagenes_url ?? [])
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormFields>({
     defaultValues: product
@@ -47,7 +48,6 @@ export function ProductFormModal({ product, onClose }: Props) {
           precio_base: product.precio_base,
           stock_cantidad: product.stock_cantidad,
           disponible: product.disponible,
-          imagenes_raw: product.imagenes_url.join('\n'),
         }
       : {
           nombre: '',
@@ -55,7 +55,6 @@ export function ProductFormModal({ product, onClose }: Props) {
           precio_base: 0,
           stock_cantidad: 0,
           disponible: true,
-          imagenes_raw: '',
         },
   })
 
@@ -128,7 +127,7 @@ export function ProductFormModal({ product, onClose }: Props) {
       precio_base: Number(fields.precio_base),
       stock_cantidad: Number(fields.stock_cantidad),
       disponible: fields.disponible,
-      imagenes_url: fields.imagenes_raw.split(/\r?\n/).map((u) => u.trim()).filter(Boolean),
+      imagenes_url: imagenes,
       categorias: selectedCatIds.map((id, idx) => {
         const original = originalCatById.get(id)
         return {
@@ -216,13 +215,8 @@ export function ProductFormModal({ product, onClose }: Props) {
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-text-secondary">URLs de imagen (una por línea)</label>
-            <textarea
-              {...register('imagenes_raw')}
-              rows={2}
-              className="w-full rounded-lg border border-border bg-bg-input px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-info transition-colors resize-none"
-              placeholder="https://ejemplo.com/imagen.jpg"
-            />
+            <label className="text-sm font-medium text-text-secondary">Imágenes</label>
+            <ImageUploader value={imagenes} onChange={setImagenes} folder="productos" />
           </div>
 
           <label className="flex items-center gap-3 cursor-pointer select-none">

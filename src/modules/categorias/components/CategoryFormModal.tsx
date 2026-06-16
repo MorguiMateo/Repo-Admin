@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import axios from 'axios'
 import { getAll, create, update } from '../services/categoriasService'
+import { ImageUploader } from '../../../shared/ImageUploader'
 import type { Category, CategoryForm } from '../types'
 
 interface Props {
@@ -14,6 +16,8 @@ interface Props {
 export function CategoryFormModal({ category, onClose }: Props) {
   const queryClient = useQueryClient()
   const isEditing = !!category
+
+  const [imagen, setImagen] = useState<string[]>(category?.imagen_url ? [category.imagen_url] : [])
 
   const { register, handleSubmit, formState: { errors } } = useForm<CategoryForm>({
     defaultValues: category
@@ -46,6 +50,7 @@ export function CategoryFormModal({ category, onClose }: Props) {
   const onSubmit = (values: CategoryForm) => {
     mutation.mutate({
       ...values,
+      imagen_url: imagen[0] ?? '',
       parent_id: values.parent_id ? Number(values.parent_id) : null,
     })
   }
@@ -87,6 +92,11 @@ export function CategoryFormModal({ category, onClose }: Props) {
               className="w-full rounded border border-border bg-bg-input px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-info resize-none"
               placeholder="Descripción opcional"
             />
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-sm text-text-secondary">Imagen</label>
+            <ImageUploader value={imagen} onChange={setImagen} folder="categorias" max={1} />
           </div>
 
           <div className="flex flex-col gap-1">
