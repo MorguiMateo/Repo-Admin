@@ -15,8 +15,8 @@ export function IngredientFormModal({ ingredient, onClose }: Props) {
 
   const { register, handleSubmit, formState: { errors } } = useForm<IngredientForm>({
     defaultValues: ingredient
-      ? { nombre: ingredient.nombre, descripcion: ingredient.descripcion ?? '', es_alergeno: ingredient.es_alergeno }
-      : { nombre: '', descripcion: '', es_alergeno: false },
+      ? { nombre: ingredient.nombre, descripcion: ingredient.descripcion ?? '', stock_cantidad: ingredient.stock_cantidad, es_alergeno: ingredient.es_alergeno }
+      : { nombre: '', descripcion: '', stock_cantidad: 0, es_alergeno: false },
   })
 
   const mutation = useMutation({
@@ -69,6 +69,23 @@ export function IngredientFormModal({ ingredient, onClose }: Props) {
               className="w-full rounded border border-border bg-bg-input px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-info resize-none"
               placeholder="Descripción opcional"
             />
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-sm text-text-secondary">Stock *</label>
+            <input
+              type="number"
+              min={0}
+              step={1}
+              {...register('stock_cantidad', {
+                valueAsNumber: true,
+                required: 'El stock es obligatorio',
+                min: { value: 0, message: 'El stock no puede ser negativo' },
+              })}
+              className="w-full rounded border border-border bg-bg-input px-3 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-info"
+              placeholder="0"
+            />
+            {errors.stock_cantidad && <p className="text-xs text-danger">{errors.stock_cantidad.message}</p>}
           </div>
 
           <label className="flex items-center gap-2 cursor-pointer select-none">

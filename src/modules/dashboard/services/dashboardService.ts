@@ -3,19 +3,7 @@ import type {
   IngresoFormaPago,
   PedidoPorEstado,
   ProductoTop,
-  ResumenKpis,
-  VentaPeriodo,
 } from '../types'
-
-export async function getResumen(): Promise<ResumenKpis> {
-  const { data } = await api.get<ResumenKpis>('/estadisticas/resumen')
-  return data
-}
-
-export async function getVentas(): Promise<VentaPeriodo[]> {
-  const { data } = await api.get<VentaPeriodo[]>('/estadisticas/ventas')
-  return data
-}
 
 export async function getProductosTop(): Promise<ProductoTop[]> {
   const { data } = await api.get<ProductoTop[]>('/estadisticas/productos-top')

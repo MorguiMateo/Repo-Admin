@@ -5,16 +5,17 @@ import { getAll, remove } from '../services/ingredientesService'
 import { IngredientFormModal } from './IngredientFormModal'
 import type { Ingredient } from '../types'
 
-//ingredientesPage nos dice si el usuario es admin o no. la tabla lo usa para mostrar o esconder acciones
+// canEdit: ADMIN o STOCK pueden editar. canManage: solo ADMIN puede eliminar.
 interface Props {
-  isAdmin: boolean
+  canEdit: boolean
+  canManage: boolean
 }
 
 // Umbral genérico para marcar "stock bajo". Ajustable cuando el back defina la
 // unidad real de stock por ingrediente.
 const LOW_STOCK_THRESHOLD = 10
 
-export function IngredientTable({ isAdmin }: Props) {
+export function IngredientTable({ canEdit, canManage }: Props) {
   const queryClient = useQueryClient()
   //la pagina arranca por 1 
   const [page, setPage] = useState(1)
@@ -73,7 +74,7 @@ export function IngredientTable({ isAdmin }: Props) {
               <th className="px-4 py-2 text-left font-medium">Descripción</th>
               <th className="px-4 py-2 text-left font-medium">Alérgeno</th>
               <th className="px-4 py-2 text-left font-medium">Stock</th>
-              {isAdmin && <th className="px-4 py-2 text-right font-medium">Acciones</th>}
+              {(canEdit || canManage) && <th className="px-4 py-2 text-right font-medium">Acciones</th>}
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -89,24 +90,28 @@ export function IngredientTable({ isAdmin }: Props) {
                   )}
                 </td>
                 <td className="px-4 py-2.5">
-                  <StockBadge stock={ing.stock} />
+                  <StockBadge stock={ing.stock_cantidad} />
                 </td>
 
-                {isAdmin && (
+                {(canEdit || canManage) && (
                   <td className="px-4 py-2.5 text-right">
                     <div className="flex items-center justify-end gap-3">
-                      <button
-                        onClick={() => setEditTarget(ing)}
-                        className="text-xs text-text-secondary cursor-pointer"
-                      >
-                        Editar
-                      </button>
-                      <button
-                        onClick={() => handleDelete(ing)}
-                        className="text-xs text-text-secondary cursor-pointer"
-                      >
-                        Eliminar
-                      </button>
+                      {canEdit && (
+                        <button
+                          onClick={() => setEditTarget(ing)}
+                          className="text-xs text-text-secondary cursor-pointer"
+                        >
+                          Editar
+                        </button>
+                      )}
+                      {canManage && (
+                        <button
+                          onClick={() => handleDelete(ing)}
+                          className="text-xs text-text-secondary cursor-pointer"
+                        >
+                          Eliminar
+                        </button>
+                      )}
                     </div>
                   </td>
                 )}

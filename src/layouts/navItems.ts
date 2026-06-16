@@ -11,7 +11,7 @@ export interface NavItem {
 export const NAV_ITEMS: NavItem[] = [
   { to: '/admin/dashboard',    label: 'Dashboard',    roles: ['ADMIN'] },
   { to: '/admin/categorias',   label: 'Categorías',   roles: ['ADMIN'] },
-  { to: '/admin/ingredientes', label: 'Ingredientes', roles: ['ADMIN'] },
+  { to: '/admin/ingredientes', label: 'Ingredientes', roles: ['ADMIN', 'STOCK'] },
   { to: '/admin/productos',    label: 'Productos',    roles: ['ADMIN', 'STOCK'] },
   { to: '/admin/pedidos',      label: 'Pedidos',      roles: ['ADMIN', 'PEDIDOS'] },
   { to: '/admin/cocina',       label: 'Cocina',       roles: ['ADMIN', 'PEDIDOS'] },

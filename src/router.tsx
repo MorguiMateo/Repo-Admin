@@ -40,7 +40,7 @@ export const router = createBrowserRouter([
           },
           {
             path: 'ingredientes',
-            element: <RequireRole allowed={['ADMIN']}><IngredientesPage /></RequireRole>,
+            element: <RequireRole allowed={['ADMIN', 'STOCK']}><IngredientesPage /></RequireRole>,
           },
           {
             path: 'productos',
