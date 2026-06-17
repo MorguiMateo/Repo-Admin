@@ -19,7 +19,7 @@ export async function create(body: IngredientForm): Promise<Ingredient> {
   return data
 }
 
-// PUT porque el back actualiza con el body completo.
+//va con PUT porque el back actualiza con el body completo
 export async function update(id: number, body: Partial<IngredientForm>): Promise<Ingredient> {
   const { data } = await api.put(`/ingredientes/${id}`, body)
   return data

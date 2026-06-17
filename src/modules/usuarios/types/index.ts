@@ -9,7 +9,7 @@ export interface UserRole {
   created_at: string
 }
 
-// usuario visto desde el panel de admin — incluye sus roles
+//usuario visto desde el panel de admin, incluye sus roles
 export interface AdminUser {
   id: number
   nombre: string

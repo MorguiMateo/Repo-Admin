@@ -12,12 +12,10 @@ export default function LoginPage() {
   //Se recupera texto de error del backend empieza en null y si se llama a setServError el componente se re recarga y muestra el texto
   const [serverError, setServerError] = useState<string | null>(null)
 
-  // crea un form tipado como loginForm con mail y pass. Ademas useForm devuelve un objeto con herramientas para el form.
-  // register: Enlaza los imput del form y define las reglas como mail obligatorio etc.
-  // handleSubmit Envuelve el onSubmit valida si esta OK y llama a la funcion con los datos
-  // errors errores d validacion por campo ejempl eerrros.mail
-  // isSubmitting : es true mientras corre el onSubmit async. cuando termina termine bien o mal devuelve false
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginForm>()    
+  //useForm nos da las herramientas del form: register conecta los inputs y sus reglas,
+  //handleSubmit valida antes de llamar al onSubmit, errors guarda los errores por campo
+  //e isSubmitting esta en true mientras se manda el form
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginForm>()
 
   // data ya llega con el mail y la pass validadas
   const onSubmit = async (data: LoginForm) => {

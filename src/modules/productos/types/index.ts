@@ -38,8 +38,7 @@ export interface Product {
   ingredientes?: ProductIngredient[]
 }
 
-// body que espera el back. La UI lo arma a partir de checkboxes simples y completa
-// `cantidad` y `unidad_medida_id` con defaults sensatos por ingrediente.
+//body que espera el back. la UI lo arma con checkboxes simples y completa cantidad y unidad_medida_id con defaults
 export interface ProductCategoryLink {
   categoria_id: number
   es_principal: boolean
@@ -63,7 +62,7 @@ export interface ProductForm {
   ingredientes: ProductIngredientLink[]
 }
 
-// filtros para el listado — aplicados client-side (el back solo acepta skip/limit)
+//filtros del listado, se aplican en el cliente (el back solo acepta skip/limit)
 export interface ProductFilters {
   search?: string
   categoria_id?: number

@@ -7,8 +7,7 @@ export interface Role {
   descripcion: string | null
 }
 
-// Usuario sin pass xq no devuelve el back. Incluye roles porque /auth/me
-// devuelve un UserPublic plano con la lista de roles incluida.
+//usuario sin pass xq el back no la devuelve. trae los roles porque /auth/me los incluye
 export interface User {
   id: number
   nombre: string
@@ -19,7 +18,7 @@ export interface User {
   created_at: string
 }
 
-// Respuesta de GET /auth/me: UserPublic plano.
+//lo que devuelve el GET /auth/me
 export type AuthMeResponse = User
 
 // formulario de login

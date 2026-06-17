@@ -4,7 +4,7 @@ import { Header } from './Header'
 import { usePedidosSocket } from '../modules/pedidos/hooks/usePedidosSocket'
 
 export default function AdminLayout() {
-  // Una sola conexión WebSocket para todo el panel: refresca pedidos en vivo.
+  //una sola conexion websocket para todo el panel, refresca los pedidos en vivo
   usePedidosSocket()
 
   return (

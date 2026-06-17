@@ -23,8 +23,8 @@ export async function getById(id: number): Promise<Order> {
   return data
 }
 
-// Avance manual de estado — reservado a ADMIN/PEDIDOS.
-// Si el estado destino es CANCELADO, motivo es obligatorio.
+//avance manual de estado, solo para ADMIN y PEDIDOS
+//si el estado destino es CANCELADO, el motivo es obligatorio
 export async function advanceStatus(id: number, body: AdvanceStatusForm): Promise<Order> {
   const { data } = await api.post(`/pedidos/${id}/avanzar`, {
     estado_hacia: body.estado_hacia,

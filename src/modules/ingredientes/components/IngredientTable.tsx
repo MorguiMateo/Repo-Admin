@@ -5,14 +5,13 @@ import { getAll, remove } from '../services/ingredientesService'
 import { IngredientFormModal } from './IngredientFormModal'
 import type { Ingredient } from '../types'
 
-// canEdit: ADMIN o STOCK pueden editar. canManage: solo ADMIN puede eliminar.
+//canEdit: ADMIN o STOCK pueden editar. canManage: solo ADMIN puede eliminar
 interface Props {
   canEdit: boolean
   canManage: boolean
 }
 
-// Umbral genérico para marcar "stock bajo". Ajustable cuando el back defina la
-// unidad real de stock por ingrediente.
+//umbral para marcar "stock bajo". se puede ajustar cuando el back defina la unidad real por ingrediente
 const LOW_STOCK_THRESHOLD = 10
 
 export function IngredientTable({ canEdit, canManage }: Props) {
@@ -151,8 +150,7 @@ export function IngredientTable({ canEdit, canManage }: Props) {
   )
 }
 
-// Muestra el stock del ingrediente (solo lectura). El back todavía no expone el
-// campo, por eso degrada a "—" cuando llega null/undefined.
+//muestra el stock del ingrediente (solo lectura). el back todavia no manda el campo, por eso pone un guion si llega null
 function StockBadge({ stock }: { stock?: number | null }) {
   if (stock == null) {
     return <span className="text-text-muted">—</span>

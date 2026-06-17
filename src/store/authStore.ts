@@ -1,4 +1,4 @@
-// Estado global de sesión (usuario + roles).
+//estado global de la sesion (usuario + roles)
 import { create } from 'zustand'
 import type { User, RoleCode } from '../modules/auth/types'
 

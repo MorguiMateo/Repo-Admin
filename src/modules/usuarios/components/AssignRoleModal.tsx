@@ -18,7 +18,7 @@ export function AssignRoleModal({ user, onClose }: Props) {
     defaultValues: { rol_codigo: 'STOCK' },
   })
 
-  // El back reemplaza la lista completa: armamos {rol nuevo} ∪ existentes.
+  //el back pisa la lista entera de roles, asi que juntamos el rol nuevo con los que ya tenia
   const mutation = useMutation({
     mutationFn: (rol_codigo: RoleCode) => {
       const finalRoles = Array.from(new Set<RoleCode>([...user.roles, rol_codigo]))

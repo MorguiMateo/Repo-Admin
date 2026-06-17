@@ -25,7 +25,7 @@ export interface OrderDetail {
   created_at: string
 }
 
-// append-only: el backend solo hace INSERTs, nunca UPDATE/DELETE
+//el back solo agrega filas aca, nunca edita ni borra
 export interface OrderStatusHistory {
   id: number
   pedido_id: number

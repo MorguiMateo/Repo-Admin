@@ -8,9 +8,9 @@ interface Props {
   canAdvance: boolean
 }
 
-// Tarjeta de cocina: muestra los productos a preparar de un pedido EN_PREP.
-// El listado (/pedidos) no trae `detalles`, así que pedimos el detalle por id.
-// La queryKey ['pedido', id] se comparte con la página de detalle → se cachea.
+//tarjeta de cocina: muestra los productos a preparar de un pedido en preparacion
+//el listado /pedidos no trae los detalles, asi que los pedimos por id
+//usamos la misma queryKey ['pedido', id] que la pagina de detalle asi se reusa la cache
 export function CocinaCard({ pedido, canAdvance }: Props) {
   const hora = new Date(pedido.created_at).toLocaleTimeString('es-AR', {
     hour: '2-digit',

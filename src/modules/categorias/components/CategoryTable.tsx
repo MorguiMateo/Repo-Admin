@@ -24,9 +24,7 @@ export function CategoryTable({ isAdmin }: Props) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categorias'] })
     },
-    //
-    //
-    // 409 pasa cuando el back rechaza eliminar una categoría que tiene productos asociados.
+    //el back tira 409 cuando intentas borrar una categoria que tiene productos
     onError: (err) => {
       if (axios.isAxiosError(err) && err.response?.status === 409) {
         setDeleteError('No se puede eliminar: la categoría tiene productos activos.')
@@ -35,9 +33,6 @@ export function CategoryTable({ isAdmin }: Props) {
       }
     },
   })
-  //
-  //
-  //
 
   const handleDelete = (cat: Category) => {
     setDeleteError(null)
@@ -96,11 +91,6 @@ export function CategoryTable({ isAdmin }: Props) {
                     <tr key={sub.id} className="bg-bg-surface hover:bg-bg-surface-2 transition-colors">
                       <td className="px-4 py-3 pl-10 text-text-secondary">↳ {sub.nombre}</td>
                       <td className="px-4 py-3 text-text-muted">{sub.descripcion ?? '—'}</td>
-                      {/**
-                       * 
-                       * 
-                       * 
-                       */}
                       {isAdmin && (
                         <td className="px-4 py-3 text-right">
                           <ActionButtons

@@ -37,7 +37,7 @@ export function ProductTable({ externalFilters, isAdmin, isStock }: Props) {
     return true
   })
 
-  // Math.ceil redondea hacia arriba: 21 productos con PAGE_SIZE=20 → 1.05 → 2 páginas
+  //Math.ceil redondea para arriba: 21 productos con PAGE_SIZE=20 da 2 paginas
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE) || 1
   const start = (page - 1) * PAGE_SIZE
   const items = filtered.slice(start, start + PAGE_SIZE)
@@ -219,8 +219,8 @@ export function ProductTable({ externalFilters, isAdmin, isStock }: Props) {
   )
 }
 
-// Celda de stock. Solo lectura para roles sin permiso; para ADMIN/STOCK muestra
-// un input editable y un botón "Guardar" que aparece únicamente cuando el valor cambió.
+//celda de stock. para roles sin permiso es solo lectura. para ADMIN/STOCK muestra un input editable
+//y un boton "Guardar" que solo aparece cuando el valor cambio
 function StockCell({
   value,
   editable,
@@ -234,7 +234,7 @@ function StockCell({
 }) {
   const [draft, setDraft] = useState(String(value))
 
-  // Si el producto se refresca (tras guardar u otra mutación) sincronizamos el input.
+  //si el producto se refresca (despues de guardar u otra mutacion) sincronizamos el input
   useEffect(() => { setDraft(String(value)) }, [value])
 
   if (!editable) {

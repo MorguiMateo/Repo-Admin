@@ -1,8 +1,7 @@
 //reemplazo del fetch
 import axios from 'axios'
 
-// Única fuente de verdad para la base de la API. Configurable por entorno
-// (VITE_API_URL) con fallback a localhost para desarrollo.
+//la base de la api. se configura con VITE_API_URL y si no, va a localhost para desarrollo
 export const API_BASE_URL =
   (import.meta.env.VITE_API_URL as string) || 'http://localhost:8000/api/v1'
 
@@ -36,10 +35,10 @@ api.interceptors.response.use(
 
     if (error.response?.status !== 401) return Promise.reject(error)
 
-    // login y refresh: el caller maneja el error directamente
+    //login y refresh: el error lo maneja quien llama
     if (url.includes('/auth/login') || url.includes('/auth/refresh')) return Promise.reject(error)
 
-    // ya se reintentó una vez — evita loop infinito si el retry también da 401
+    //si ya se reintento una vez, lo dejamos pasar asi no se hace un loop infinito
     if (error.config._retry) return Promise.reject(error)
     error.config._retry = true
 
@@ -47,7 +46,7 @@ api.interceptors.response.use(
       await api.post('/auth/refresh')
       return api(error.config)
     } catch {
-      // /auth/me lo maneja useAuthInit → clearAuth → AuthGate redirige a /login
+      //el /auth/me lo maneja useAuthInit (limpia la sesion y AuthGate manda al login)
       if (!url.includes('/auth/me')) window.location.href = '/login'
       return Promise.reject(error)
     }

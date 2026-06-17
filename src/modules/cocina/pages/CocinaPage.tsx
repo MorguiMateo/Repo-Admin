@@ -3,8 +3,8 @@ import { getAll } from '../../pedidos/services/pedidosService'
 import { CocinaCard } from '../components/CocinaCard'
 import { useAuthStore } from '../../../store/authStore'
 
-// Pantalla de Cocina: recibe los pedidos EN PREPARACIÓN para marcarlos
-// como Entregado o cancelarlos. Solo ADMIN/PEDIDOS puede ejecutar las acciones.
+//pantalla de cocina: trae los pedidos en preparacion para marcarlos como entregados o cancelarlos
+//solo ADMIN y PEDIDOS pueden hacer las acciones
 export default function CocinaPage() {
   const canAdvance = useAuthStore((s) => s.hasRole(['ADMIN', 'PEDIDOS']))
 
@@ -13,7 +13,7 @@ export default function CocinaPage() {
     queryFn: () => getAll({ estado: 'EN_PREP', size: 200 }),
   })
 
-  // El filtro de estado lo aplica el backend; reforzamos en cliente por las dudas.
+  //el filtro de estado ya lo hace el back, pero lo reforzamos en el cliente por las dudas
   const items = (data?.items ?? []).filter((p) => p.estado_codigo === 'EN_PREP')
 
   return (

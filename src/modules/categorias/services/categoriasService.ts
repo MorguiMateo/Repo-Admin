@@ -21,7 +21,7 @@ export async function create(body: CategoryForm): Promise<Category> {
   return data
 }
 
-// PUT porque el back recibe el body completo.
+//va con PUT porque el back espera el body completo
 export async function update(id: number, body: Partial<CategoryForm>): Promise<Category> {
   const { data } = await api.put(`/categorias/${id}`, body)
   return data

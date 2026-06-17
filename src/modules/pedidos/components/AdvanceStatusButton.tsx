@@ -3,7 +3,7 @@ import axios from 'axios'
 import { advanceStatus, cancelOrder } from '../services/pedidosService'
 import type { OrderStatusCode } from '../types'
 
-// Extrae el mensaje de error del backend (FastAPI devuelve { detail }) para mostrarlo al usuario.
+//saca el mensaje de error que manda el back (viene en { detail }) para mostrarselo al usuario
 function getErrorMessage(err: unknown): string {
   if (axios.isAxiosError(err)) {
     const detail = err.response?.data?.detail
@@ -51,7 +51,7 @@ export function AdvanceStatusButton({ pedidoId, estadoActual }: Props) {
   const advanceMutation = useMutation({
     //argumento que recibe mi func cuando se le de por ejemplo al boton de aprobar pedido
     mutationFn: (estado_hacia: OrderStatusCode) =>
-      // POST /pedidos/{id}/avanzar — el back valida la transición y devuelve el pedido actualizado.
+      //POST /pedidos/{id}/avanzar: el back valida la transicion y devuelve el pedido actualizado
       advanceStatus(pedidoId, { estado_hacia }),
     onSuccess: invalidate,
   })

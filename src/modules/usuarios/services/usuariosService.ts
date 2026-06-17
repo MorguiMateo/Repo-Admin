@@ -22,20 +22,20 @@ export async function getAll(params: UsuarioFilters): Promise<PaginatedResponse<
   return wrapAsPage(data, page, size)
 }
 
-// PATCH /admin/usuarios/{id}/roles — reemplaza la lista completa de roles del usuario.
-// El back exige `roles` con min length 1; el caller arma la lista final.
+//PATCH /admin/usuarios/{id}/roles: pisa la lista completa de roles del usuario
+//el back pide al menos 1 rol, la lista final la arma quien llama
 export async function setRoles(id: number, roles: RoleCode[]): Promise<AdminUser> {
   const { data } = await api.patch(`/admin/usuarios/${id}/roles`, { roles })
   return data
 }
 
-// DELETE /admin/usuarios/{id} — soft delete (setea deleted_at = now()).
+//DELETE /admin/usuarios/{id}: soft delete, le setea el deleted_at
 export async function softDelete(id: number): Promise<void> {
   await api.delete(`/admin/usuarios/${id}`)
 }
 
-// POST /auth/register + PATCH /admin/usuarios/{id}/roles si el rol no es CLIENT.
-// El register siempre asigna CLIENT; si se eligió otro rol lo reemplazamos.
+//POST /auth/register y despues PATCH de roles si el rol no es CLIENT
+//el register siempre deja CLIENT, si se eligio otro rol lo pisamos
 export async function createUser(form: CreateUserForm): Promise<AdminUser> {
   const { rol, celular, ...registerData } = form
   const { data: newUser } = await api.post<AdminUser>('/auth/register', {

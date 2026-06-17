@@ -7,17 +7,16 @@ interface Props {
   pedido: Order
 }
 
-// Tarjeta del historial: muestra el detalle completo de un pedido ENTREGADO.
-// El listado (/pedidos) no trae `usuario`/`detalles`/`historial`, así que pedimos
-// el detalle por id. La queryKey ['pedido', id] se comparte con la página de
-// detalle y la pantalla de cocina → se reutiliza el cache.
+//tarjeta del historial: muestra el detalle completo de un pedido entregado
+//el listado /pedidos no trae usuario, detalles ni historial, asi que los pedimos por id
+//usamos la misma queryKey ['pedido', id] que detalle y cocina asi se reusa la cache
 export function HistorialCard({ pedido }: Props) {
   const { data: detalle, isLoading } = useQuery({
     queryKey: ['pedido', pedido.id],
     queryFn: () => getById(pedido.id),
   })
 
-  // Mientras llega el detalle usamos lo que ya trae el listado.
+  //mientras carga el detalle usamos lo que ya trae el listado
   const full = detalle ?? pedido
   const detalles = full.detalles ?? []
 

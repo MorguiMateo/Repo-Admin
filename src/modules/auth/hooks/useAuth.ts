@@ -5,7 +5,7 @@ import { useAuthStore } from '../../../store/authStore'
 import { logout as logoutService } from '../services/authService'
 import type { AuthMeResponse } from '../types'
 
-// Comprueba la sesion al entrar a rutas protegidas. Lo usa AuthGate.
+//chequea si hay sesion al entrar a las rutas protegidas. lo usa AuthGate
 export function useAuthInit() {
   const { setAuth, clearAuth } = useAuthStore()
 
@@ -13,7 +13,7 @@ export function useAuthInit() {
     queryKey: ['auth', 'me'],
     queryFn: async () => {
       try {
-        // /auth/me devuelve un UserPublic plano con la lista de roles.
+        //auth/me nos devuelve el usuario con su lista de roles
         const { data } = await api.get<AuthMeResponse>('/auth/me')
         setAuth(data, data.roles)
         return data

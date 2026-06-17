@@ -20,15 +20,14 @@ export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
 
   {
-    // Sin path: AuthGate envuelve todas las rutas protegidas
+    //sin path: AuthGate envuelve todas las rutas protegidas
     element: <AuthGate />,
     children: [
       {
         path: '/admin',
         element: <AdminLayout />,
         children: [
-          //index es la ruta por defecto de /admin: redirige al primer módulo
-          //que el usuario puede ver según su rol (ADMIN→dashboard, STOCK→productos, etc.)
+          //ruta por defecto de /admin: manda al primer modulo que el usuario puede ver segun su rol
           { index: true, element: <AdminIndex /> },
           {
             path: 'dashboard',

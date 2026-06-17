@@ -70,8 +70,7 @@ export function ProductFormModal({ product, onClose }: Props) {
     staleTime: Infinity,
   })
 
-  // Necesitamos al menos una unidad para mandar al back en cada ingrediente.
-  // La UI hoy no permite elegirla, así que usamos la primera disponible como default.
+  //el back necesita una unidad por cada ingrediente. la UI todavia no deja elegirla, asi que usamos la primera como default
   const { data: unidades } = useQuery({
     queryKey: ['unidades-medida'],
     queryFn: async () => {
@@ -100,9 +99,8 @@ export function ProductFormModal({ product, onClose }: Props) {
     },
   })
 
-  // Mapas con los datos originales del producto, para preservar es_principal /
-  // cantidad / unidad_medida_id / es_removible cuando el usuario edita sin tocar
-  // esos campos (la UI hoy no los expone).
+  //guardamos los datos originales del producto para no perder es_principal, cantidad, unidad y es_removible
+  //cuando el usuario edita sin tocar esos campos (la UI todavia no los muestra)
   const originalCatById = new Map(
     (product?.categorias ?? []).map((pc) => [pc.categoria.id, pc])
   )
@@ -111,8 +109,7 @@ export function ProductFormModal({ product, onClose }: Props) {
   )
 
   const onSubmit = (fields: FormFields) => {
-    // Solo bloqueamos si hay ingredientes NUEVOS (que no estaban antes) y no
-    // tenemos una unidad de medida default para asignarles.
+    //solo cortamos si hay ingredientes nuevos (que no estaban antes) y no tenemos una unidad default para asignarles
     const ingredientesNuevosSinUnidad = selectedIngIds.some(
       (id) => !originalIngById.has(id),
     )
@@ -132,8 +129,7 @@ export function ProductFormModal({ product, onClose }: Props) {
         const original = originalCatById.get(id)
         return {
           categoria_id: id,
-          // Si la categoría ya estaba asociada, preservamos su es_principal.
-          // Si es nueva, la marcamos como principal solo si es la primera seleccionada.
+          //si la categoria ya estaba, mantenemos su es_principal. si es nueva, la marcamos principal solo si es la primera elegida
           es_principal: original ? original.es_principal : idx === 0,
         }
       }),

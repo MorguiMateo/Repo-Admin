@@ -15,10 +15,9 @@ export function PedidoCard({ pedido, canAdvance }: Props) {
     minute: '2-digit',
   })
 
-  // El listado /pedidos no trae `detalles`; los pedimos por id para mostrarlos
-  // siempre, igual que en Cocina. La queryKey ['pedido', id] se comparte con la
-  // página de detalle y Cocina, así que se cachea. Los detalles son un snapshot
-  // inmutable, por eso no hace falta refetchInterval.
+  //el listado /pedidos no trae los detalles, los pedimos por id para mostrarlos siempre, igual que en cocina
+  //compartimos la queryKey ['pedido', id] con detalle y cocina asi se cachea
+  //los detalles son un snapshot que no cambia, por eso no hace falta refetchInterval
   const { data: detalle, isLoading } = useQuery({
     queryKey: ['pedido', pedido.id],
     queryFn: () => getById(pedido.id),

@@ -2,8 +2,8 @@ import { useQuery } from '@tanstack/react-query'
 import { getAll } from '../services/pedidosService'
 import { HistorialCard } from '../components/HistorialCard'
 
-// Historial de entregados: lista solo los pedidos en estado ENTREGADO.
-// ENTREGADO es terminal, así que las tarjetas no muestran botones de avance.
+//historial de entregados: lista solo los pedidos en estado entregado
+//entregado es un estado final, asi que las tarjetas no muestran botones de avance
 export default function HistorialPage() {
   const { data, isLoading, isError, isFetching } = useQuery({
     queryKey: ['pedidos', { historial: true }],
@@ -11,7 +11,7 @@ export default function HistorialPage() {
     refetchInterval: 5000,
   })
 
-  // El filtro de estado lo aplica el backend; reforzamos en cliente por las dudas.
+  //el filtro de estado ya lo hace el back, pero lo reforzamos en el cliente por las dudas
   const items = (data?.items ?? []).filter((p) => p.estado_codigo === 'ENTREGADO')
 
   return (

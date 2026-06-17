@@ -19,7 +19,7 @@ export function UserTable({ filters }: { filters: UsuarioFilters }) {
     queryFn: () => getAll({ ...filters, size: 100 }),
   })
 
-  // El back reemplaza la lista completa: armamos la nueva lista sin el rol que se quita.
+  //el back pisa la lista entera, asi que mandamos la nueva lista sin el rol que se saca
   const removeRoleMutation = useMutation({
     mutationFn: ({ user, rol }: { user: AdminUser; rol: RoleCode }) =>
       setRoles(user.id, user.roles.filter((r) => r !== rol)),
